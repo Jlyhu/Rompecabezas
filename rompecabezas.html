@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rompecabezas GitHub</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        #puzzle-container {
+            width: 90%;
+            max-width: 500px;
+            margin: 20px auto;
+            position: relative;
+            height: 500px;
+            border: 3px solid #2c3e50;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            background-color: #ecf0f1;
+        }
+        
+        .puzzle-piece {
+            position: absolute;
+            border: 2px solid #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            z-index: 1;
+        }
+        
+        .puzzle-piece:hover {
+            transform: scale(1.02);
+            z-index: 2;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        }
+        
+        #controls {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        button {
+            padding: 12px 25px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-weight: 600;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+        
+        #message {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #2c3e50;
+            text-align: center;
+            min-height: 27px;
+            font-weight: 500;
+            padding: 10px 20px;
+            background-color: rgba(255,255,255,0.7);
+            border-radius: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        @media (max-width: 600px) {
+            #puzzle-container {
+                height: 350px;
+            }
+            
+            button {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Rompecabezas GitHub</h1>
+    
+    <div id="puzzle-container"></div>
+    
+    <div id="controls">
+        <button id="start-btn">Mezclar</button>
+        <button id="solve-btn">Resolver</button>
+    </div>
+    
+    <div id="message">Cargando rompecabezas...</div>
+    
+    <script>
+        // Configuración del rompecabezas
+        const GRID_SIZE = 4; // 4x4 piezas (puedes cambiarlo a 3 para más facilidad)
+        const IMAGE_URL = 'puzzle.jpg'; // Nombre de tu imagen en GitHub
+        
+        // Elementos del DOM
+        const puzzleContainer = document.getElementById('puzzle-container');
+        const startBtn = document.getElementById('start-btn');
+        const solveBtn = document.getElementById('solve-btn');
+        const messageEl = document.getElementById('message');
+        
+        // Variables del juego
+        let pieces = [];
+        let boardSize = 0;
+        let pieceSize = 0;
+        let solvedPositions = [];
+        
+        // Inicializar el juego
+        function initGame() {
+            // Tamaño del tablero
+            boardSize = Math.min(500, window.innerWidth - 40);
+            puzzleContainer.style.width = boardSize + 'px';
+            puzzleContainer.style.height = boardSize + 'px';
+            pieceSize = boardSize / GRID_SIZE;
+            
+            // Cargar la imagen
+            loadImage();
+            
+            // Event listeners
+            startBtn.addEventListener('click', shufflePieces);
+            solveBtn.addEventListener('click', solvePuzzle);
+        }
+        
+        function loadImage() {
+            messageEl.textContent = 'Cargando imagen...';
+            
+            const img = new Image();
+            img.crossOrigin = "Anonymous"; // Para evitar problemas CORS en GitHub Pages
+            img.src = IMAGE_URL;
+            
+            img.onload = function() {
+                createPuzzlePieces(img);
+                messageEl.textContent = 'Haz clic en "Mezclar" para comenzar!';
+                startBtn.disabled = false;
+                solveBtn.disabled = false;
+            };
+            
+            img.onerror = function() {
+                messageEl.textContent = 'Error al cargar la imagen. Asegúrate de que se llame "puzzle.jpg" y esté en la misma carpeta.';
+                console.error("No se pudo cargar la imagen:", IMAGE_URL);
+            };
+        }
+        
+        // Crear las piezas del rompecabezas
+        function createPuzzlePieces(img) {
+            // Limpiar el contenedor
+            puzzleContainer.innerHTML = '';
+            pieces = [];
+            solvedPositions = [];
+            
+            // Ajustar tamaño de la imagen para que encaje
+            const canvas = document.createElement('canvas');
+            canvas.width = boardSize;
+            canvas.height = boardSize;
+            const ctx = canvas.getContext('2d');
+            
+            // Calcular relación de aspecto
+            const imgRatio = img.width / img.height;
+            const containerRatio = boardSize / boardSize;
+            
+            let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
+            
+            if (imgRatio > containerRatio) {
+                drawHeight = boardSize;
+                drawWidth = img.width * (boardSize / img.height);
+                offsetX = (boardSize - drawWidth) / 2;
+            } else {
+                drawWidth = boardSize;
+                drawHeight = img.height * (boardSize / img.width);
+                offsetY = (boardSize - drawHeight) / 2;
+            }
+            
+            ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+            
+            // Crear cada pieza
+            for (let row = 0; row < GRID_SIZE; row++) {
+                for (let col = 0; col < GRID_SIZE; col++) {
+                    // Saltar la última pieza (espacio vacío)
+                    if (row === GRID_SIZE - 1 && col === GRID_SIZE - 1) {
+                        solvedPositions.push(null);
+                        continue;
+                    }
+                    
+                    // Crear un canvas para cada pieza
+                    const pieceCanvas = document.createElement('canvas');
+                    pieceCanvas.width = pieceSize;
+                    pieceCanvas.height = pieceSize;
+                    const pieceCtx = pieceCanvas.getContext('2d');
+                    
+                    // Cortar la sección correspondiente de la imagen
+                    pieceCtx.drawImage(
+                        canvas,
+                        col * pieceSize, row * pieceSize, pieceSize, pieceSize,
+                        0, 0, pieceSize, pieceSize
+                    );
+                    
+                    // Crear elemento div para la pieza
+                    const piece = document.createElement('div');
+                    piece.className = 'puzzle-piece';
+                    piece.style.width = pieceSize + 'px';
+                    piece.style.height = pieceSize + 'px';
+                    piece.style.backgroundImage = `url(${pieceCanvas.toDataURL()})`;
+                    piece.style.backgroundSize = `${boardSize}px ${boardSize}px`;
+                    piece.style.backgroundPosition = `-${col * pieceSize}px -${row * pieceSize}px`;
+                    
+                    // Guardar posición original
+                    piece.dataset.originalRow = row;
+                    piece.dataset.originalCol = col;
+                    
+                    // Posición inicial (resuelta)
+                    piece.style.top = row * pieceSize + 'px';
+                    piece.style.left = col * pieceSize + 'px';
+                    
+                    // Agregar al contenedor y al array de piezas
+                    puzzleContainer.appendChild(piece);
+                    pieces.push(piece);
+                    solvedPositions.push({row, col});
+                }
+            }
+            
+            // Agregar null para la pieza vacía
+            solvedPositions.push(null);
+        }
+        
+        // Mezclar las piezas
+        function shufflePieces() {
+            messageEl.textContent = 'Puzzle mezclado! Intenta resolverlo.';
+            
+            // Posiciones aleatorias
+            const positions = [];
+            for (let row = 0; row < GRID_SIZE; row++) {
+                for (let col = 0; col < GRID_SIZE; col++) {
+                    positions.push({row, col});
+                }
+            }
+            
+            // Mezclar posiciones
+            for (let i = positions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [positions[i], positions[j]] = [positions[j], positions[i]];
+            }
+            
+            // Asignar posiciones a las piezas
+            let posIndex = 0;
+            pieces.forEach(piece => {
+                const pos = positions[posIndex++];
+                piece.style.top = pos.row * pieceSize + 'px';
+                piece.style.left = pos.col * pieceSize + 'px';
+            });
+        }
+        
+        // Resolver el rompecabezas
+        function solvePuzzle() {
+            messageEl.textContent = '¡Puzzle resuelto! Haz clic en "Mezclar" para jugar de nuevo.';
+            
+            // Colocar cada pieza en su posición original
+            pieces.forEach(piece => {
+                const row = parseInt(piece.dataset.originalRow);
+                const col = parseInt(piece.dataset.originalCol);
+                
+                piece.style.top = row * pieceSize + 'px';
+                piece.style.left = col * pieceSize + 'px';
+            });
+        }
+        
+        // Iniciar el juego cuando se cargue la página
+        window.addEventListener('load', initGame);
+    </script>
+</body>
+</html>
