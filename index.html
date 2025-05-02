@@ -271,7 +271,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>Ser familia de todas formas con: </h1>
+        <h1>Ser familia de todas formas</h1>
         <img src="nutella.png" alt="Nutella" class="nutella-logo">
     </div>
     
@@ -301,7 +301,8 @@
     </div>
     
     <audio id="bg-music" loop>
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+        <source src="radiant-family-moments.mp3" type="audio/mpeg">
+        Tu navegador no soporta el elemento de audio.
     </audio>
     
     <audio id="piece-sound" preload="auto">
@@ -380,7 +381,7 @@
             if (isFirstInteraction) {
                 isFirstInteraction = false;
                 isMusicOn = true;
-                bgMusic.volume = 0.1;
+                bgMusic.volume = 0.3; // Volumen moderado
                 pieceSound.volume = 0.5;
                 bgMusic.play().catch(e => console.log("Error al reproducir música:", e));
                 musicControl.innerHTML = '<i class="fas fa-volume-up"></i>';
