@@ -26,15 +26,16 @@
             min-height: 100vh;
             background: linear-gradient(135deg, #FFF8E1 0%, #FFE0B2 100%);
             padding: 20px;
+            overflow-x: hidden;
         }
         
         h1 {
             font-family: 'Pixie Ring', cursive;
             color: #5D4037;
-            margin: 20px 0;
+            margin: 10px 0;
             text-align: center;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-            font-size: 2.5rem;
+            font-size: 2rem;
             letter-spacing: 1px;
         }
         
@@ -43,32 +44,36 @@
             flex-direction: column;
             align-items: center;
             width: 100%;
-            max-width: 1200px;
+            max-width: 100%;
             margin: 0 auto;
+            flex-grow: 1;
         }
         
         .game-area {
             position: relative;
             width: 100%;
-            max-width: 1000px;
-            margin: 20px 0;
-            height: 800px;
+            max-width: 100%;
+            margin: 10px 0;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         
         #puzzle-container {
-            width: 612px;
-            height: 792px;
+            width: 90vmin;
+            height: 117vmin; /* Relación 3:4 */
+            max-width: 612px;
+            max-height: 792px;
             border: 3px solid #5D4037;
             border-radius: 10px;
-            background-color: #D2B48C; /* Color café claro */
+            background-color: #D2B48C;
             background-image: url('https://www.transparenttextures.com/patterns/wood-pattern.png');
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             overflow: hidden;
             z-index: 1;
+            position: relative;
         }
         
         #pieces-area {
@@ -77,7 +82,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 2; /* Aseguramos que las piezas estén sobre el contenedor */
+            z-index: 2;
+            pointer-events: none;
         }
         
         .puzzle-piece {
@@ -88,7 +94,8 @@
             border: 2px solid #FFF3E0;
             box-shadow: 0 3px 5px rgba(0,0,0,0.2);
             background-color: #FFF3E0;
-            z-index: 10; /* Z-index alto para que siempre estén encima */
+            z-index: 10;
+            pointer-events: auto;
         }
         
         .puzzle-piece:active {
@@ -103,13 +110,14 @@
             cursor: default;
             box-shadow: none;
             border: 1px solid rgba(93, 64, 55, 0.3);
-            z-index: 1; /* Piezas colocadas detrás de las que se arrastran */
+            z-index: 1;
+            pointer-events: auto;
         }
         
         #controls {
-            margin: 20px 0;
+            margin: 15px 0;
             display: flex;
-            gap: 15px;
+            gap: 10px;
             flex-wrap: wrap;
             justify-content: center;
             align-items: center;
@@ -117,13 +125,13 @@
         }
         
         button {
-            padding: 12px 25px;
+            padding: 10px 20px;
             background-color: #E64A19;
             color: white;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             transition: all 0.3s;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             font-weight: 600;
@@ -137,19 +145,22 @@
 
         #difficulty-selector {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 8px;
+            margin: 10px 0;
             background-color: #FFF3E0;
-            padding: 10px;
+            padding: 8px;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             z-index: 10;
+            flex-wrap: wrap;
+            justify-content: center;
         }
         
         #difficulty-selector button {
-            padding: 8px 15px;
+            padding: 6px 12px;
             background-color: #A1887F;
             color: #FFF;
+            font-size: 12px;
         }
         
         #difficulty-selector button.active {
@@ -164,21 +175,21 @@
             transform: translate(-50%, -50%);
             background-color: rgba(67, 160, 71, 0.9);
             color: white;
-            padding: 20px 40px;
+            padding: 15px 30px;
             border-radius: 10px;
-            font-size: 24px;
+            font-size: 18px;
             font-weight: bold;
-            z-index: 1000; /* Encima de todo */
+            z-index: 1000;
             box-shadow: 0 10px 25px rgba(0,0,0,0.15);
             animation: fadeIn 0.5s;
         }
         
         #music-control {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
+            bottom: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
             background-color: rgba(230, 74, 25, 0.8);
             border-radius: 50%;
             display: flex;
@@ -191,55 +202,12 @@
         
         #music-control i {
             color: white;
-            font-size: 24px;
+            font-size: 18px;
         }
         
         @keyframes fadeIn {
             from { opacity: 0; transform: translate(-50%, -40%); }
             to { opacity: 1; transform: translate(-50%, -50%); }
-        }
-        
-        @media (max-width: 1200px) {
-            .game-area {
-                height: 700px;
-            }
-            #puzzle-container {
-                width: 500px;
-                height: 650px;
-            }
-            h1 {
-                font-size: 2rem;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .game-area {
-                height: 600px;
-            }
-            #puzzle-container {
-                width: 400px;
-                height: 520px;
-            }
-            #difficulty-selector {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            h1 {
-                font-size: 1.8rem;
-            }
-        }
-        
-        @media (max-width: 500px) {
-            .game-area {
-                height: 500px;
-            }
-            #puzzle-container {
-                width: 300px;
-                height: 390px;
-            }
-            h1 {
-                font-size: 1.5rem;
-            }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -257,8 +225,8 @@
         </div>
         
         <div class="game-area">
-            <div id="pieces-area"></div>
             <div id="puzzle-container"></div>
+            <div id="pieces-area"></div>
         </div>
         
         <div id="controls">
@@ -276,6 +244,10 @@
         <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" type="audio/mpeg">
     </audio>
     
+    <audio id="piece-sound">
+        <source src="https://www.soundjay.com/buttons/sounds/button-09.mp3" type="audio/mpeg">
+    </audio>
+    
     <script>
         // Configuración del juego
         let GRID_SIZE = 2;
@@ -289,26 +261,23 @@
         const difficultyButtons = document.querySelectorAll('#difficulty-selector button');
         const musicControl = document.getElementById('music-control');
         const bgMusic = document.getElementById('bg-music');
+        const pieceSound = document.getElementById('piece-sound');
         
         // Variables del juego
         let pieces = [];
         let placedPieces = 0;
-        let boardWidth = 612;
-        let boardHeight = 792;
         let pieceWidth = 0;
         let pieceHeight = 0;
         let imgObj = null;
         let isMusicOn = false;
+        let isFirstInteraction = true;
         
         // Inicializar el juego
         function initGame() {
-            adjustBoardSize();
+            calculateBoardSize();
             
-            puzzleContainer.style.width = boardWidth + 'px';
-            puzzleContainer.style.height = boardHeight + 'px';
-            
-            pieceWidth = boardWidth / GRID_SIZE;
-            pieceHeight = boardHeight / GRID_SIZE;
+            pieceWidth = puzzleContainer.offsetWidth / GRID_SIZE;
+            pieceHeight = puzzleContainer.offsetHeight / GRID_SIZE;
             
             loadImage();
             
@@ -328,27 +297,28 @@
             document.addEventListener('click', initMusic, { once: true });
         }
         
-        function adjustBoardSize() {
-            if (window.innerWidth <= 500) {
-                boardWidth = 300;
-                boardHeight = 390;
-            } else if (window.innerWidth <= 768) {
-                boardWidth = 400;
-                boardHeight = 520;
-            } else if (window.innerWidth <= 1200) {
-                boardWidth = 500;
-                boardHeight = 650;
-            } else {
-                boardWidth = 612;
-                boardHeight = 792;
-            }
+        function calculateBoardSize() {
+            // El tamaño ya está controlado por CSS con vmin
+            // Solo necesitamos asegurarnos de que las dimensiones sean correctas
+            const containerWidth = Math.min(
+                window.innerWidth * 0.9,
+                612 // max-width
+            );
+            const containerHeight = containerWidth * (4/3); // Relación 3:4
+            
+            puzzleContainer.style.width = containerWidth + 'px';
+            puzzleContainer.style.height = containerHeight + 'px';
         }
         
         function initMusic() {
-            isMusicOn = true;
-            bgMusic.volume = 0.2;
-            bgMusic.play().catch(e => console.log("Error al reproducir música:", e));
-            musicControl.innerHTML = '<i class="fas fa-volume-up"></i>';
+            if (isFirstInteraction) {
+                isFirstInteraction = false;
+                isMusicOn = true;
+                bgMusic.volume = 0.2;
+                pieceSound.volume = 0.3;
+                bgMusic.play().catch(e => console.log("Error al reproducir música:", e));
+                musicControl.innerHTML = '<i class="fas fa-volume-up"></i>';
+            }
         }
         
         function toggleMusic() {
@@ -381,8 +351,35 @@
             };
             
             img.onerror = function() {
-                alert('Error al cargar la imagen. Asegúrate de que se llame "puzzle.jpg" y esté en la misma carpeta.');
+                // Si no hay imagen, creamos un fondo de ejemplo
+                imgObj = createSampleImage();
+                createPuzzlePieces(imgObj);
+                console.log('No se encontró puzzle.jpg, usando imagen de ejemplo');
             };
+        }
+        
+        function createSampleImage() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 800;
+            canvas.height = 600;
+            const ctx = canvas.getContext('2d');
+            
+            // Fondo degradado
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#FFC107');
+            gradient.addColorStop(1, '#FF9800');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Texto
+            ctx.fillStyle = '#5D4037';
+            ctx.font = 'bold 40px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Rompecabezas Familiar', canvas.width/2, canvas.height/2);
+            ctx.font = '20px Arial';
+            ctx.fillText('Coloca las piezas en su lugar', canvas.width/2, canvas.height/2 + 40);
+            
+            return canvas;
         }
         
         function createPuzzlePieces(img) {
@@ -393,30 +390,33 @@
             successMessage.style.display = 'none';
             
             const fullCanvas = document.createElement('canvas');
-            fullCanvas.width = boardWidth;
-            fullCanvas.height = boardHeight;
+            fullCanvas.width = puzzleContainer.offsetWidth;
+            fullCanvas.height = puzzleContainer.offsetHeight;
             const fullCtx = fullCanvas.getContext('2d');
             
+            // Dibujar fondo de madera
             fullCtx.fillStyle = '#D2B48C';
-            fullCtx.fillRect(0, 0, boardWidth, boardHeight);
+            fullCtx.fillRect(0, 0, fullCanvas.width, fullCanvas.height);
             
-            // Dimensiones para ajustar la imagen
-            let drawWidth, drawHeight;
+            // Calcular dimensiones para que la imagen se ajuste manteniendo relación de aspecto
             const imgRatio = img.width / img.height;
-            const containerRatio = boardWidth / boardHeight;
+            const containerRatio = fullCanvas.width / fullCanvas.height;
             
-            // Fill mode - la imagen siempre llenará el contenedor completamente
+            let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
+            
             if (imgRatio > containerRatio) {
-                drawHeight = boardHeight;
+                // La imagen es más ancha que el contenedor
+                drawHeight = fullCanvas.height;
                 drawWidth = drawHeight * imgRatio;
-                const offsetX = (boardWidth - drawWidth) / 2;
-                fullCtx.drawImage(img, offsetX, 0, drawWidth, drawHeight);
+                offsetX = (fullCanvas.width - drawWidth) / 2;
             } else {
-                drawWidth = boardWidth;
-                drawHeight = drawWidth / imgRatio; 
-                const offsetY = (boardHeight - drawHeight) / 2;
-                fullCtx.drawImage(img, 0, offsetY, drawWidth, drawHeight);
+                // La imagen es más alta que el contenedor
+                drawWidth = fullCanvas.width;
+                drawHeight = drawWidth / imgRatio;
+                offsetY = (fullCanvas.height - drawHeight) / 2;
             }
+            
+            fullCtx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
             
             // Crear piezas y distribuirlas alrededor del puzzle
             for (let row = 0; row < GRID_SIZE; row++) {
@@ -438,37 +438,58 @@
             const puzzleRect = puzzleContainer.getBoundingClientRect();
             
             const margin = 20;
-            
-            let posX, posY;
-            const side = Math.floor(Math.random() * 4);
+            const safeArea = {
+                left: areaRect.left,
+                top: areaRect.top,
+                right: areaRect.right,
+                bottom: areaRect.bottom
+            };
             
             // Convertir coordenadas globales a relativas
-            const puzzleLeft = puzzleRect.left - areaRect.left;
-            const puzzleTop = puzzleRect.top - areaRect.top;
+            const puzzleLeft = puzzleRect.left - safeArea.left;
+            const puzzleTop = puzzleRect.top - safeArea.top;
             const puzzleRight = puzzleLeft + puzzleRect.width;
             const puzzleBottom = puzzleTop + puzzleRect.height;
             
-            switch (side) {
-                case 0: // Arriba
-                    posX = Math.random() * (areaRect.width - pieceWidth - margin * 2) + margin;
-                    posY = Math.random() * (puzzleTop - pieceHeight - margin) + margin;
-                    break;
-                case 1: // Derecha
-                    posX = puzzleRight + Math.random() * (areaRect.width - puzzleRight - pieceWidth - margin) + margin;
-                    posY = Math.random() * (areaRect.height - pieceHeight - margin * 2) + margin;
-                    break;
-                case 2: // Abajo
-                    posX = Math.random() * (areaRect.width - pieceWidth - margin * 2) + margin;
-                    posY = puzzleBottom + Math.random() * (areaRect.height - puzzleBottom - pieceHeight - margin) + margin;
-                    break;
-                case 3: // Izquierda
-                    posX = Math.random() * (puzzleLeft - pieceWidth - margin) + margin;
-                    posY = Math.random() * (areaRect.height - pieceHeight - margin * 2) + margin;
-                    break;
+            // Áreas donde pueden aparecer las piezas
+            const areas = [
+                { // Arriba
+                    x: [margin, areaRect.width - piece.offsetWidth - margin],
+                    y: [margin, puzzleTop - piece.offsetHeight - margin]
+                },
+                { // Derecha
+                    x: [puzzleRight + margin, areaRect.width - piece.offsetWidth - margin],
+                    y: [margin, areaRect.height - piece.offsetHeight - margin]
+                },
+                { // Abajo
+                    x: [margin, areaRect.width - piece.offsetWidth - margin],
+                    y: [puzzleBottom + margin, areaRect.height - piece.offsetHeight - margin]
+                },
+                { // Izquierda
+                    x: [margin, puzzleLeft - piece.offsetWidth - margin],
+                    y: [margin, areaRect.height - piece.offsetHeight - margin]
+                }
+            ];
+            
+            // Filtrar áreas válidas (donde el espacio es suficiente)
+            const validAreas = areas.filter(area => {
+                const widthAvailable = area.x[1] - area.x[0] > 0;
+                const heightAvailable = area.y[1] - area.y[0] > 0;
+                return widthAvailable && heightAvailable;
+            });
+            
+            if (validAreas.length === 0) {
+                // Si no hay espacio suficiente, colocar en cualquier lugar
+                piece.style.left = Math.random() * (areaRect.width - piece.offsetWidth - margin * 2) + margin + 'px';
+                piece.style.top = Math.random() * (areaRect.height - piece.offsetHeight - margin * 2) + margin + 'px';
+                return;
             }
             
-            posX = Math.max(margin, Math.min(areaRect.width - pieceWidth - margin, posX));
-            posY = Math.max(margin, Math.min(areaRect.height - pieceHeight - margin, posY));
+            // Seleccionar un área aleatoria válida
+            const area = validAreas[Math.floor(Math.random() * validAreas.length)];
+            
+            const posX = Math.random() * (area.x[1] - area.x[0]) + area.x[0];
+            const posY = Math.random() * (area.y[1] - area.y[0]) + area.y[0];
             
             piece.style.left = posX + 'px';
             piece.style.top = posY + 'px';
@@ -506,6 +527,7 @@
         function makeDraggable(piece) {
             let offsetX, offsetY;
             let isDragging = false;
+            let startX, startY;
             
             piece.addEventListener('mousedown', startDrag);
             piece.addEventListener('touchstart', startDrag, { passive: false });
@@ -524,6 +546,10 @@
                     offsetY = e.touches[0].clientY - rect.top;
                     e.preventDefault();
                 }
+                
+                // Guardar posición inicial para posible cancelación
+                startX = parseFloat(piece.style.left) || 0;
+                startY = parseFloat(piece.style.top) || 0;
                 
                 piece.style.zIndex = '100';
                 piece.style.transform = 'scale(1.03)';
@@ -581,9 +607,28 @@
                         
                         placePiece(piece, targetRow, targetCol);
                     } else {
-                        resetPiecePosition(piece);
+                        // Si no es la posición correcta pero está dentro del contenedor,
+                        // dejarla donde el usuario la soltó
+                        const gameArea = document.querySelector('.game-area');
+                        const areaRect = gameArea.getBoundingClientRect();
+                        
+                        const leftPos = pieceRect.left - areaRect.left;
+                        const topPos = pieceRect.top - areaRect.top;
+                        
+                        piece.style.left = leftPos + 'px';
+                        piece.style.top = topPos + 'px';
+                        piece.style.zIndex = '10';
                     }
                 } else {
+                    // Si está fuera del contenedor, dejarla donde el usuario la soltó
+                    const gameArea = document.querySelector('.game-area');
+                    const areaRect = gameArea.getBoundingClientRect();
+                    
+                    const leftPos = pieceRect.left - areaRect.left;
+                    const topPos = pieceRect.top - areaRect.top;
+                    
+                    piece.style.left = leftPos + 'px';
+                    piece.style.top = topPos + 'px';
                     piece.style.zIndex = '10';
                 }
                 
@@ -602,15 +647,16 @@
                 piece.style.cursor = 'default';
                 piece.style.zIndex = '1';
                 
+                // Reproducir sonido al colocar pieza
+                if (!isFirstInteraction) {
+                    pieceSound.currentTime = 0;
+                    pieceSound.play().catch(e => console.log("Error al reproducir sonido:", e));
+                }
+                
                 placedPieces++;
                 if (placedPieces === GRID_SIZE * GRID_SIZE) {
                     showSuccess();
                 }
-            }
-            
-            function resetPiecePosition(piece) {
-                positionPieceAround(piece);
-                piece.style.zIndex = '10';
             }
             
             function removeDragListeners() {
@@ -632,14 +678,7 @@
         
         window.addEventListener('load', initGame);
         window.addEventListener('resize', function() {
-            const oldWidth = boardWidth;
-            const oldHeight = boardHeight;
-            
-            adjustBoardSize();
-            
-            if (oldWidth !== boardWidth || oldHeight !== boardHeight) {
-                initGame();
-            }
+            initGame();
         });
     </script>
 </body>
