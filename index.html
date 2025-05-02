@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rompecabezas de Carta</title>
+    <title>Rompecabezas Familiar</title>
     <style>
         * {
             box-sizing: border-box;
@@ -17,47 +17,48 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: linear-gradient(135deg, #FFF8E1 0%, #FFE0B2 100%);
             padding: 20px;
         }
         
         h1 {
-            color: #2c3e50;
+            color: #5D4037;
             margin: 20px 0;
             text-align: center;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
         
         .game-area {
             display: flex;
-            flex-wrap: wrap;
             justify-content: center;
-            gap: 20px;
+            gap: 30px;
             width: 100%;
-            max-width: 1200px;
+            max-width: 1800px;
+            margin: 20px 0;
         }
         
         #puzzle-container {
-            width: 816px; /* Tamaño carta en pixels (8.5x11 pulgadas a 96dpi) */
-            height: 1056px;
-            border: 3px solid #2c3e50;
+            width: 612px; /* 75% tamaño carta */
+            height: 792px;
+            border: 3px solid #5D4037;
             border-radius: 10px;
-            background-color: #ecf0f1;
+            background-color: #FFF3E0;
             position: relative;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             overflow: hidden;
         }
         
         #pieces-container {
-            width: 816px;
-            height: 1056px;
+            width: 612px;
+            height: 792px;
             display: flex;
             flex-wrap: wrap;
             align-content: flex-start;
             gap: 10px;
-            padding: 10px;
-            border: 2px dashed #7f8c8d;
+            padding: 15px;
+            border: 2px dashed #A1887F;
             border-radius: 10px;
-            background-color: rgba(255,255,255,0.5);
+            background-color: rgba(255, 243, 224, 0.7);
             overflow-y: auto;
         }
         
@@ -65,16 +66,17 @@
             background-size: cover;
             position: relative;
             cursor: grab;
-            transition: transform 0.1s;
-            border: 2px solid #fff;
-            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+            transition: all 0.2s ease;
+            border: 2px solid #FFF3E0;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+            background-color: #FFF3E0;
         }
         
         .puzzle-piece:active {
             cursor: grabbing;
-            transform: scale(1.05);
+            transform: scale(1.03);
             z-index: 10;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.2);
         }
         
         .puzzle-piece.placed {
@@ -94,36 +96,41 @@
         
         button {
             padding: 12px 25px;
-            background-color: #3498db;
+            background-color: #E64A19;
             color: white;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             font-size: 16px;
             transition: all 0.3s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             font-weight: 600;
         }
         
         button:hover {
-            background-color: #2980b9;
+            background-color: #BF360C;
             transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
 
         #difficulty-selector {
             display: flex;
             gap: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            background-color: #FFF3E0;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         
         #difficulty-selector button {
             padding: 8px 15px;
-            background-color: #95a5a6;
+            background-color: #A1887F;
+            color: #FFF;
         }
         
         #difficulty-selector button.active {
-            background-color: #27ae60;
+            background-color: #5D4037;
         }
         
         #success-message {
@@ -132,14 +139,14 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: rgba(46, 204, 113, 0.9);
+            background-color: rgba(67, 160, 71, 0.9);
             color: white;
             padding: 20px 40px;
             border-radius: 10px;
             font-size: 24px;
             font-weight: bold;
             z-index: 100;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
             animation: fadeIn 0.5s;
         }
         
@@ -149,14 +156,14 @@
             right: 20px;
             width: 50px;
             height: 50px;
-            background-color: rgba(52, 152, 219, 0.8);
+            background-color: rgba(230, 74, 25, 0.8);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             z-index: 10;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
         }
         
         #music-control i {
@@ -169,21 +176,23 @@
             to { opacity: 1; transform: translate(-50%, -50%); }
         }
         
-        @media (max-width: 1800px) {
+        @media (max-width: 1400px) {
+            #puzzle-container, #pieces-container {
+                width: 510px; /* 62.5% tamaño carta */
+                height: 660px;
+            }
+        }
+        
+        @media (max-width: 1200px) {
             .game-area {
                 flex-direction: column;
                 align-items: center;
             }
-            
-            #puzzle-container, #pieces-container {
-                width: 612px; /* 75% del tamaño carta */
-                height: 792px;
-            }
         }
         
-        @media (max-width: 700px) {
+        @media (max-width: 600px) {
             #puzzle-container, #pieces-container {
-                width: 408px; /* 50% del tamaño carta */
+                width: 408px; /* 50% tamaño carta */
                 height: 528px;
             }
             
@@ -191,12 +200,16 @@
                 flex-wrap: wrap;
                 justify-content: center;
             }
+            
+            h1 {
+                font-size: 24px;
+            }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <h1>Rompecabezas de Carta</h1>
+    <h1>Rompecabezas Familiar</h1>
     
     <div id="difficulty-selector">
         <button data-difficulty="2" class="active">Fácil (2×2)</button>
@@ -221,13 +234,13 @@
     </div>
     
     <audio id="bg-music" loop>
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3" type="audio/mpeg">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" type="audio/mpeg">
     </audio>
     
     <script>
         // Configuración del juego
-        let GRID_SIZE = 2; // Valor inicial: Fácil
-        const IMAGE_URL = 'puzzle.jpg'; // Nombre de tu imagen
+        let GRID_SIZE = 2;
+        const IMAGE_URL = 'puzzle.jpg';
         
         // Elementos del DOM
         const puzzleContainer = document.getElementById('puzzle-container');
@@ -241,8 +254,8 @@
         // Variables del juego
         let pieces = [];
         let placedPieces = 0;
-        let boardWidth = 816; // Tamaño carta en pixels (8.5x11" a 96dpi)
-        let boardHeight = 1056;
+        let boardWidth = 612;
+        let boardHeight = 792;
         let pieceWidth = 0;
         let pieceHeight = 0;
         let imgObj = null;
@@ -250,7 +263,6 @@
         
         // Inicializar el juego
         function initGame() {
-            // Ajustar tamaño según dispositivo
             adjustBoardSize();
             
             puzzleContainer.style.width = boardWidth + 'px';
@@ -261,13 +273,10 @@
             pieceWidth = boardWidth / GRID_SIZE;
             pieceHeight = boardHeight / GRID_SIZE;
             
-            // Cargar la imagen
             loadImage();
             
-            // Event listeners
             startBtn.addEventListener('click', initGame);
             
-            // Configurar botones de dificultad
             difficultyButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     difficultyButtons.forEach(btn => btn.classList.remove('active'));
@@ -277,30 +286,26 @@
                 });
             });
             
-            // Control de música
             musicControl.addEventListener('click', toggleMusic);
-            
-            // Reproducir música después de interacción del usuario
             document.addEventListener('click', initMusic, { once: true });
         }
         
         function adjustBoardSize() {
-            if (window.innerWidth <= 700) {
-                boardWidth = 408; // 50% del tamaño carta
+            if (window.innerWidth <= 600) {
+                boardWidth = 408;
                 boardHeight = 528;
-            } else if (window.innerWidth <= 1800) {
-                boardWidth = 612; // 75% del tamaño carta
-                boardHeight = 792;
+            } else if (window.innerWidth <= 1400) {
+                boardWidth = 510;
+                boardHeight = 660;
             } else {
-                boardWidth = 816; // Tamaño carta completo
-                boardHeight = 1056;
+                boardWidth = 612;
+                boardHeight = 792;
             }
         }
         
         function initMusic() {
-            // Solo se ejecuta una vez después del primer clic del usuario
             isMusicOn = true;
-            bgMusic.volume = 0.3;
+            bgMusic.volume = 0.2; // Volumen más bajo para ambiente tranquilo
             bgMusic.play().catch(e => console.log("Error al reproducir música:", e));
             musicControl.innerHTML = '<i class="fas fa-volume-up"></i>';
         }
@@ -340,45 +345,38 @@
         }
         
         function createPuzzlePieces(img) {
-            // Limpiar contenedores
             puzzleContainer.innerHTML = '';
             piecesContainer.innerHTML = '';
             pieces = [];
             placedPieces = 0;
             successMessage.style.display = 'none';
             
-            // Crear canvas temporal para la imagen completa
             const fullCanvas = document.createElement('canvas');
             fullCanvas.width = boardWidth;
             fullCanvas.height = boardHeight;
             const fullCtx = fullCanvas.getContext('2d');
             
-            // Dibujar imagen preservando la proporción
             const imgRatio = img.width / img.height;
             const containerRatio = boardWidth / boardHeight;
             
             let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
             
             if (imgRatio > containerRatio) {
-                // Imagen más ancha que el contenedor
                 drawWidth = boardWidth;
                 drawHeight = boardWidth / imgRatio;
                 offsetY = (boardHeight - drawHeight) / 2;
             } else {
-                // Imagen más alta que el contenedor
                 drawHeight = boardHeight;
                 drawWidth = boardHeight * imgRatio;
                 offsetX = (boardWidth - drawWidth) / 2;
             }
             
-            // Dibujar con suavizado para mejor calidad
             fullCtx.imageSmoothingEnabled = true;
             fullCtx.imageSmoothingQuality = 'high';
-            fullCtx.fillStyle = '#ecf0f1'; // Color de fondo para áreas vacías
+            fullCtx.fillStyle = '#FFF3E0';
             fullCtx.fillRect(0, 0, boardWidth, boardHeight);
             fullCtx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
             
-            // Crear piezas individuales
             for (let row = 0; row < GRID_SIZE; row++) {
                 for (let col = 0; col < GRID_SIZE; col++) {
                     const piece = createPiece(fullCanvas, row, col);
@@ -387,7 +385,6 @@
                 }
             }
             
-            // Mezclar piezas
             shufflePieces();
         }
         
@@ -399,27 +396,22 @@
             piece.dataset.row = row;
             piece.dataset.col = col;
             
-            // Crear canvas para la pieza individual
             const pieceCanvas = document.createElement('canvas');
             pieceCanvas.width = pieceWidth;
             pieceCanvas.height = pieceHeight;
             const pieceCtx = pieceCanvas.getContext('2d');
             
-            // Activar suavizado para mejor calidad
             pieceCtx.imageSmoothingEnabled = true;
             pieceCtx.imageSmoothingQuality = 'high';
             
-            // Extraer fragmento de la imagen
             pieceCtx.drawImage(
                 fullCanvas,
                 col * pieceWidth, row * pieceHeight, pieceWidth, pieceHeight,
                 0, 0, pieceWidth, pieceHeight
             );
             
-            // Aplicar la imagen como fondo
             piece.style.backgroundImage = `url(${pieceCanvas.toDataURL('image/jpeg', 1.0)})`;
             
-            // Hacer arrastrable
             makeDraggable(piece);
             
             return piece;
@@ -437,7 +429,6 @@
                 
                 isDragging = true;
                 
-                // Calcular offset
                 const rect = piece.getBoundingClientRect();
                 if (e.type === 'mousedown') {
                     offsetX = e.clientX - rect.left;
@@ -445,13 +436,12 @@
                 } else {
                     offsetX = e.touches[0].clientX - rect.left;
                     offsetY = e.touches[0].clientY - rect.top;
-                    e.preventDefault(); // Prevenir scroll en móviles
+                    e.preventDefault();
                 }
                 
-                // Estilo durante el arrastre
                 piece.style.position = 'absolute';
                 piece.style.zIndex = '100';
-                piece.style.transform = 'scale(1.1)';
+                piece.style.transform = 'scale(1.03)';
                 
                 document.addEventListener('mousemove', drag);
                 document.addEventListener('touchmove', drag, { passive: false });
@@ -469,7 +459,7 @@
                 piece.style.top = (clientY - offsetY) + 'px';
                 
                 if (e.type === 'touchmove') {
-                    e.preventDefault(); // Prevenir scroll en móviles
+                    e.preventDefault();
                 }
             }
             
@@ -479,7 +469,6 @@
                 
                 piece.style.transform = '';
                 
-                // Verificar si está sobre el puzzle container
                 const puzzleRect = puzzleContainer.getBoundingClientRect();
                 const pieceRect = piece.getBoundingClientRect();
                 const pieceCenterX = pieceRect.left + pieceRect.width / 2;
@@ -488,15 +477,12 @@
                 if (pieceCenterX > puzzleRect.left && pieceCenterX < puzzleRect.right &&
                     pieceCenterY > puzzleRect.top && pieceCenterY < puzzleRect.bottom) {
                     
-                    // Calcular posición correcta
                     const targetCol = Math.floor((pieceCenterX - puzzleRect.left) / pieceWidth);
                     const targetRow = Math.floor((pieceCenterY - puzzleRect.top) / pieceHeight);
                     
-                    // Verificar si es la posición correcta
                     if (parseInt(piece.dataset.row) === targetRow && 
                         parseInt(piece.dataset.col) === targetCol) {
                         
-                        // Colocar en la posición correcta
                         placePiece(piece, targetRow, targetCol);
                     } else {
                         returnToPiecesContainer(piece);
@@ -515,7 +501,6 @@
                 piece.style.top = (row * pieceHeight) + 'px';
                 piece.style.cursor = 'default';
                 
-                // Verificar si el puzzle está completo
                 placedPieces++;
                 if (placedPieces === GRID_SIZE * GRID_SIZE) {
                     showSuccess();
@@ -538,7 +523,6 @@
         }
         
         function shufflePieces() {
-            // Mezclar el orden de las piezas
             for (let i = pieces.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 piecesContainer.appendChild(pieces[j]);
@@ -553,7 +537,6 @@
             }, 2000);
         }
         
-        // Iniciar el juego
         window.addEventListener('load', initGame);
         window.addEventListener('resize', function() {
             adjustBoardSize();
