@@ -28,61 +28,72 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
         
-        .game-area {
+        .game-container {
             display: flex;
-            justify-content: center;
-            gap: 30px;
+            flex-direction: column;
+            align-items: center;
             width: 100%;
-            max-width: 1800px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .game-area {
+            position: relative;
+            width: 100%;
+            max-width: 1000px;
             margin: 20px 0;
+            height: 800px;
         }
         
         #puzzle-container {
-            width: 612px; /* 75% tamaño carta */
+            width: 612px;
             height: 792px;
             border: 3px solid #5D4037;
             border-radius: 10px;
-            background-color: #FFF3E0;
-            position: relative;
+            background-color: #f5e9dc; /* Cambiado a un tono más claro */
+            background-image: url('https://www.transparenttextures.com/patterns/cardboard.png'); /* Textura de cartón */
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             overflow: hidden;
+            z-index: 1;
         }
         
-        #pieces-container {
-            width: 612px;
-            height: 792px;
-            display: flex;
-            flex-wrap: wrap;
-            align-content: flex-start;
-            gap: 10px;
-            padding: 15px;
-            border: 2px dashed #A1887F;
-            border-radius: 10px;
-            background-color: rgba(255, 243, 224, 0.7);
-            overflow-y: auto;
+        #pieces-area {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
         }
         
         .puzzle-piece {
             background-size: cover;
-            position: relative;
+            position: absolute;
             cursor: grab;
             transition: all 0.2s ease;
             border: 2px solid #FFF3E0;
-            box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
             background-color: #FFF3E0;
+            z-index: 2;
         }
         
         .puzzle-piece:active {
             cursor: grabbing;
             transform: scale(1.03);
             z-index: 10;
-            box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.3);
         }
         
         .puzzle-piece.placed {
             position: absolute;
             cursor: default;
             box-shadow: none;
+            border: 1px solid rgba(93, 64, 55, 0.3);
+            z-index: 1;
         }
         
         #controls {
@@ -92,6 +103,7 @@
             flex-wrap: wrap;
             justify-content: center;
             align-items: center;
+            z-index: 10;
         }
         
         button {
@@ -121,6 +133,7 @@
             padding: 10px;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 10;
         }
         
         #difficulty-selector button {
@@ -170,37 +183,71 @@
             color: white;
             font-size: 24px;
         }
+
+        #background-selector {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .bg-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #FFF;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+
+        .bg-option:hover, .bg-option.active {
+            transform: scale(1.2);
+            border-color: #5D4037;
+        }
+
+        .bg-wood { background-color: #8D6E63; }
+        .bg-cork { background-color: #D7CCC8; }
+        .bg-felt { background-color: #81C784; }
+        .bg-denim { background-color: #5C6BC0; }
         
         @keyframes fadeIn {
             from { opacity: 0; transform: translate(-50%, -40%); }
             to { opacity: 1; transform: translate(-50%, -50%); }
         }
         
-        @media (max-width: 1400px) {
-            #puzzle-container, #pieces-container {
-                width: 510px; /* 62.5% tamaño carta */
-                height: 660px;
-            }
-        }
-        
         @media (max-width: 1200px) {
             .game-area {
-                flex-direction: column;
-                align-items: center;
+                height: 700px;
+            }
+            #puzzle-container {
+                width: 500px;
+                height: 650px;
             }
         }
         
-        @media (max-width: 600px) {
-            #puzzle-container, #pieces-container {
-                width: 408px; /* 50% tamaño carta */
-                height: 528px;
+        @media (max-width: 768px) {
+            .game-area {
+                height: 600px;
             }
-            
+            #puzzle-container {
+                width: 400px;
+                height: 520px;
+            }
             #difficulty-selector {
                 flex-wrap: wrap;
                 justify-content: center;
             }
-            
+        }
+        
+        @media (max-width: 500px) {
+            .game-area {
+                height: 500px;
+            }
+            #puzzle-container {
+                width: 300px;
+                height: 390px;
+            }
             h1 {
                 font-size: 24px;
             }
@@ -209,22 +256,31 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <h1>Rompecabezas Familiar</h1>
-    
-    <div id="difficulty-selector">
-        <button data-difficulty="2" class="active">Fácil (2×2)</button>
-        <button data-difficulty="3">Medio (3×3)</button>
-        <button data-difficulty="4">Difícil (4×4)</button>
-        <button data-difficulty="5">Experto (5×5)</button>
-    </div>
-    
-    <div class="game-area">
-        <div id="puzzle-container"></div>
-        <div id="pieces-container"></div>
-    </div>
-    
-    <div id="controls">
-        <button id="start-btn">Nuevo Juego</button>
+    <div class="game-container">
+        <h1>Rompecabezas Familiar</h1>
+        
+        <div id="difficulty-selector">
+            <button data-difficulty="2" class="active">Fácil (2×2)</button>
+            <button data-difficulty="3">Medio (3×3)</button>
+            <button data-difficulty="4">Difícil (4×4)</button>
+            <button data-difficulty="5">Experto (5×5)</button>
+        </div>
+        
+        <div id="background-selector">
+            <div class="bg-option bg-wood active" data-bg="wood" title="Madera"></div>
+            <div class="bg-option bg-cork" data-bg="cork" title="Corcho"></div>
+            <div class="bg-option bg-felt" data-bg="felt" title="Fieltro"></div>
+            <div class="bg-option bg-denim" data-bg="denim" title="Mezclilla"></div>
+        </div>
+        
+        <div class="game-area">
+            <div id="pieces-area"></div>
+            <div id="puzzle-container"></div>
+        </div>
+        
+        <div id="controls">
+            <button id="start-btn">Nuevo Juego</button>
+        </div>
     </div>
     
     <div id="success-message">¡Rompecabezas Completo!</div>
@@ -244,10 +300,11 @@
         
         // Elementos del DOM
         const puzzleContainer = document.getElementById('puzzle-container');
-        const piecesContainer = document.getElementById('pieces-container');
+        const piecesArea = document.getElementById('pieces-area');
         const startBtn = document.getElementById('start-btn');
         const successMessage = document.getElementById('success-message');
         const difficultyButtons = document.querySelectorAll('#difficulty-selector button');
+        const bgOptions = document.querySelectorAll('.bg-option');
         const musicControl = document.getElementById('music-control');
         const bgMusic = document.getElementById('bg-music');
         
@@ -260,6 +317,27 @@
         let pieceHeight = 0;
         let imgObj = null;
         let isMusicOn = false;
+        let currentBackground = 'wood';
+        
+        // Mapeo de fondos
+        const backgrounds = {
+            wood: {
+                color: '#f5e9dc',
+                texture: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")'
+            },
+            cork: {
+                color: '#e8e0d5',
+                texture: 'url("https://www.transparenttextures.com/patterns/cardboard.png")'
+            },
+            felt: {
+                color: '#dcedc8',
+                texture: 'url("https://www.transparenttextures.com/patterns/felt.png")'
+            },
+            denim: {
+                color: '#d0d9ff',
+                texture: 'url("https://www.transparenttextures.com/patterns/denim.png")'
+            }
+        };
         
         // Inicializar el juego
         function initGame() {
@@ -267,14 +345,13 @@
             
             puzzleContainer.style.width = boardWidth + 'px';
             puzzleContainer.style.height = boardHeight + 'px';
-            piecesContainer.style.width = boardWidth + 'px';
-            piecesContainer.style.height = boardHeight + 'px';
             
             pieceWidth = boardWidth / GRID_SIZE;
             pieceHeight = boardHeight / GRID_SIZE;
             
             loadImage();
             
+            // Configurar eventos
             startBtn.addEventListener('click', initGame);
             
             difficultyButtons.forEach(button => {
@@ -286,17 +363,38 @@
                 });
             });
             
+            bgOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    bgOptions.forEach(opt => opt.classList.remove('active'));
+                    this.classList.add('active');
+                    currentBackground = this.dataset.bg;
+                    applyBackground();
+                });
+            });
+            
             musicControl.addEventListener('click', toggleMusic);
             document.addEventListener('click', initMusic, { once: true });
+            
+            // Aplicar fondo inicial
+            applyBackground();
+        }
+        
+        function applyBackground() {
+            const bg = backgrounds[currentBackground];
+            puzzleContainer.style.backgroundColor = bg.color;
+            puzzleContainer.style.backgroundImage = bg.texture;
         }
         
         function adjustBoardSize() {
-            if (window.innerWidth <= 600) {
-                boardWidth = 408;
-                boardHeight = 528;
-            } else if (window.innerWidth <= 1400) {
-                boardWidth = 510;
-                boardHeight = 660;
+            if (window.innerWidth <= 500) {
+                boardWidth = 300;
+                boardHeight = 390;
+            } else if (window.innerWidth <= 768) {
+                boardWidth = 400;
+                boardHeight = 520;
+            } else if (window.innerWidth <= 1200) {
+                boardWidth = 500;
+                boardHeight = 650;
             } else {
                 boardWidth = 612;
                 boardHeight = 792;
@@ -305,7 +403,7 @@
         
         function initMusic() {
             isMusicOn = true;
-            bgMusic.volume = 0.2; // Volumen más bajo para ambiente tranquilo
+            bgMusic.volume = 0.2;
             bgMusic.play().catch(e => console.log("Error al reproducir música:", e));
             musicControl.innerHTML = '<i class="fas fa-volume-up"></i>';
         }
@@ -346,46 +444,97 @@
         
         function createPuzzlePieces(img) {
             puzzleContainer.innerHTML = '';
-            piecesContainer.innerHTML = '';
+            piecesArea.innerHTML = '';
             pieces = [];
             placedPieces = 0;
             successMessage.style.display = 'none';
             
+            // Cálculo mejorado para llenar completamente el contenedor
             const fullCanvas = document.createElement('canvas');
             fullCanvas.width = boardWidth;
             fullCanvas.height = boardHeight;
             const fullCtx = fullCanvas.getContext('2d');
             
+            // Primero pintamos el fondo para áreas transparentes
+            fullCtx.fillStyle = backgrounds[currentBackground].color;
+            fullCtx.fillRect(0, 0, boardWidth, boardHeight);
+            
+            // Dimensiones para ajustar la imagen
+            let drawWidth, drawHeight;
             const imgRatio = img.width / img.height;
             const containerRatio = boardWidth / boardHeight;
             
-            let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
-            
+            // Fill mode - la imagen siempre llenará el contenedor completamente
             if (imgRatio > containerRatio) {
-                drawWidth = boardWidth;
-                drawHeight = boardWidth / imgRatio;
-                offsetY = (boardHeight - drawHeight) / 2;
-            } else {
+                // Imagen más ancha que el contenedor - ajustar por altura
                 drawHeight = boardHeight;
-                drawWidth = boardHeight * imgRatio;
-                offsetX = (boardWidth - drawWidth) / 2;
+                drawWidth = drawHeight * imgRatio;
+                const offsetX = (boardWidth - drawWidth) / 2;
+                fullCtx.drawImage(img, offsetX, 0, drawWidth, drawHeight);
+            } else {
+                // Imagen más alta que el contenedor - ajustar por ancho
+                drawWidth = boardWidth;
+                drawHeight = drawWidth / imgRatio; 
+                const offsetY = (boardHeight - drawHeight) / 2;
+                fullCtx.drawImage(img, 0, offsetY, drawWidth, drawHeight);
             }
             
-            fullCtx.imageSmoothingEnabled = true;
-            fullCtx.imageSmoothingQuality = 'high';
-            fullCtx.fillStyle = '#FFF3E0';
-            fullCtx.fillRect(0, 0, boardWidth, boardHeight);
-            fullCtx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
-            
+            // Crear piezas y distribuirlas alrededor del puzzle
             for (let row = 0; row < GRID_SIZE; row++) {
                 for (let col = 0; col < GRID_SIZE; col++) {
                     const piece = createPiece(fullCanvas, row, col);
-                    piecesContainer.appendChild(piece);
+                    piecesArea.appendChild(piece);
+                    
+                    // Posicionar aleatoriamente alrededor del puzzle
+                    positionPieceAround(piece);
+                    
                     pieces.push(piece);
                 }
             }
+        }
+        
+        function positionPieceAround(piece) {
+            const gameArea = document.querySelector('.game-area');
+            const areaRect = gameArea.getBoundingClientRect();
+            const puzzleRect = puzzleContainer.getBoundingClientRect();
             
-            shufflePieces();
+            // Calcular área disponible alrededor del puzzle
+            const margin = 20; // Margen del borde
+            
+            let posX, posY;
+            const side = Math.floor(Math.random() * 4); // 0: arriba, 1: derecha, 2: abajo, 3: izquierda
+            
+            // Convertir coordenadas globales a relativas
+            const puzzleLeft = puzzleRect.left - areaRect.left;
+            const puzzleTop = puzzleRect.top - areaRect.top;
+            const puzzleRight = puzzleLeft + puzzleRect.width;
+            const puzzleBottom = puzzleTop + puzzleRect.height;
+            
+            switch (side) {
+                case 0: // Arriba
+                    posX = Math.random() * (areaRect.width - pieceWidth - margin * 2) + margin;
+                    posY = Math.random() * (puzzleTop - pieceHeight - margin) + margin;
+                    break;
+                case 1: // Derecha
+                    posX = puzzleRight + Math.random() * (areaRect.width - puzzleRight - pieceWidth - margin) + margin;
+                    posY = Math.random() * (areaRect.height - pieceHeight - margin * 2) + margin;
+                    break;
+                case 2: // Abajo
+                    posX = Math.random() * (areaRect.width - pieceWidth - margin * 2) + margin;
+                    posY = puzzleBottom + Math.random() * (areaRect.height - puzzleBottom - pieceHeight - margin) + margin;
+                    break;
+                case 3: // Izquierda
+                    posX = Math.random() * (puzzleLeft - pieceWidth - margin) + margin;
+                    posY = Math.random() * (areaRect.height - pieceHeight - margin * 2) + margin;
+                    break;
+            }
+            
+            // Asegurarse de que la pieza está completamente dentro del área
+            posX = Math.max(margin, Math.min(areaRect.width - pieceWidth - margin, posX));
+            posY = Math.max(margin, Math.min(areaRect.height - pieceHeight - margin, posY));
+            
+            piece.style.left = posX + 'px';
+            piece.style.top = posY + 'px';
         }
         
         function createPiece(fullCanvas, row, col) {
@@ -420,6 +569,7 @@
         function makeDraggable(piece) {
             let offsetX, offsetY;
             let isDragging = false;
+            let startX, startY;
             
             piece.addEventListener('mousedown', startDrag);
             piece.addEventListener('touchstart', startDrag, { passive: false });
@@ -433,13 +583,17 @@
                 if (e.type === 'mousedown') {
                     offsetX = e.clientX - rect.left;
                     offsetY = e.clientY - rect.top;
+                    startX = rect.left;
+                    startY = rect.top;
                 } else {
                     offsetX = e.touches[0].clientX - rect.left;
                     offsetY = e.touches[0].clientY - rect.top;
+                    startX = rect.left;
+                    startY = rect.top;
                     e.preventDefault();
                 }
                 
-                piece.style.position = 'absolute';
+                // Traer al frente
                 piece.style.zIndex = '100';
                 piece.style.transform = 'scale(1.03)';
                 
@@ -455,8 +609,15 @@
                 const clientX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
                 const clientY = e.type === 'mousemove' ? e.clientY : e.touches[0].clientY;
                 
-                piece.style.left = (clientX - offsetX) + 'px';
-                piece.style.top = (clientY - offsetY) + 'px';
+                const gameArea = document.querySelector('.game-area');
+                const areaRect = gameArea.getBoundingClientRect();
+                
+                // Posición relativa al área de juego
+                const leftPos = clientX - offsetX - areaRect.left;
+                const topPos = clientY - offsetY - areaRect.top;
+                
+                piece.style.left = leftPos + 'px';
+                piece.style.top = topPos + 'px';
                 
                 if (e.type === 'touchmove') {
                     e.preventDefault();
@@ -477,18 +638,27 @@
                 if (pieceCenterX > puzzleRect.left && pieceCenterX < puzzleRect.right &&
                     pieceCenterY > puzzleRect.top && pieceCenterY < puzzleRect.bottom) {
                     
-                    const targetCol = Math.floor((pieceCenterX - puzzleRect.left) / pieceWidth);
-                    const targetRow = Math.floor((pieceCenterY - puzzleRect.top) / pieceHeight);
+                    // Calcular la posición relativa dentro del puzzle
+                    const relativeX = pieceCenterX - puzzleRect.left;
+                    const relativeY = pieceCenterY - puzzleRect.top;
+                    
+                    const targetCol = Math.floor(relativeX / pieceWidth);
+                    const targetRow = Math.floor(relativeY / pieceHeight);
                     
                     if (parseInt(piece.dataset.row) === targetRow && 
-                        parseInt(piece.dataset.col) === targetCol) {
+                        parseInt(piece.dataset.col) === targetCol &&
+                        targetRow >= 0 && targetRow < GRID_SIZE && 
+                        targetCol >= 0 && targetCol < GRID_SIZE) {
                         
+                        // Colocar la pieza en su posición correcta
                         placePiece(piece, targetRow, targetCol);
                     } else {
-                        returnToPiecesContainer(piece);
+                        // Volver a la posición inicial
+                        resetPiecePosition(piece);
                     }
                 } else {
-                    returnToPiecesContainer(piece);
+                    // La pieza queda donde fue soltada
+                    piece.style.zIndex = '2';
                 }
                 
                 removeDragListeners();
@@ -497,9 +667,15 @@
             function placePiece(piece, row, col) {
                 puzzleContainer.appendChild(piece);
                 piece.classList.add('placed');
-                piece.style.left = (col * pieceWidth) + 'px';
-                piece.style.top = (row * pieceHeight) + 'px';
+                
+                // Calcular posición absoluta dentro del puzzle
+                const left = col * pieceWidth;
+                const top = row * pieceHeight;
+                
+                piece.style.left = left + 'px';
+                piece.style.top = top + 'px';
                 piece.style.cursor = 'default';
+                piece.style.zIndex = '1';
                 
                 placedPieces++;
                 if (placedPieces === GRID_SIZE * GRID_SIZE) {
@@ -507,11 +683,11 @@
                 }
             }
             
-            function returnToPiecesContainer(piece) {
-                piecesContainer.appendChild(piece);
-                piece.style.position = 'relative';
-                piece.style.left = '';
-                piece.style.top = '';
+            function resetPiecePosition(piece) {
+                // Mantener la pieza en el área de juego pero no en su posición original
+                const gameArea = document.querySelector('.game-area');
+                positionPieceAround(piece);
+                piece.style.zIndex = '2';
             }
             
             function removeDragListeners() {
@@ -522,16 +698,10 @@
             }
         }
         
-        function shufflePieces() {
-            for (let i = pieces.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                piecesContainer.appendChild(pieces[j]);
-                [pieces[i], pieces[j]] = [pieces[j], pieces[i]];
-            }
-        }
-        
         function showSuccess() {
             successMessage.style.display = 'block';
+            successMessage.textContent = '¡Rompecabezas Completo!';
+            
             setTimeout(() => {
                 successMessage.style.display = 'none';
             }, 2000);
@@ -539,8 +709,14 @@
         
         window.addEventListener('load', initGame);
         window.addEventListener('resize', function() {
+            const oldWidth = boardWidth;
+            const oldHeight = boardHeight;
+            
             adjustBoardSize();
-            initGame();
+            
+            if (oldWidth !== boardWidth || oldHeight !== boardHeight) {
+                initGame();
+            }
         });
     </script>
 </body>
