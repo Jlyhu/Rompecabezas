@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rompecabezas Arrastrable</title>
+    <title>Rompecabezas de Carta</title>
     <style>
         * {
             box-sizing: border-box;
@@ -37,18 +37,19 @@
         }
         
         #puzzle-container {
-            width: 500px;
-            height: 650px;
+            width: 816px; /* Tamaño carta en pixels (8.5x11 pulgadas a 96dpi) */
+            height: 1056px;
             border: 3px solid #2c3e50;
             border-radius: 10px;
             background-color: #ecf0f1;
             position: relative;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
         
         #pieces-container {
-            width: 500px;
-            height: 650px;
+            width: 816px;
+            height: 1056px;
             display: flex;
             flex-wrap: wrap;
             align-content: flex-start;
@@ -168,32 +169,22 @@
             to { opacity: 1; transform: translate(-50%, -50%); }
         }
         
-        @media (max-width: 1100px) {
+        @media (max-width: 1800px) {
             .game-area {
                 flex-direction: column;
                 align-items: center;
             }
             
-            #puzzle-container {
-                width: 400px;
-                height: 520px;
-            }
-            
-            #pieces-container {
-                width: 400px;
-                height: 520px;
+            #puzzle-container, #pieces-container {
+                width: 612px; /* 75% del tamaño carta */
+                height: 792px;
             }
         }
         
-        @media (max-width: 500px) {
-            #puzzle-container {
-                width: 300px;
-                height: 390px;
-            }
-            
-            #pieces-container {
-                width: 300px;
-                height: 390px;
+        @media (max-width: 700px) {
+            #puzzle-container, #pieces-container {
+                width: 408px; /* 50% del tamaño carta */
+                height: 528px;
             }
             
             #difficulty-selector {
@@ -205,7 +196,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <h1>Rompecabezas Arrastrable</h1>
+    <h1>Rompecabezas de Carta</h1>
     
     <div id="difficulty-selector">
         <button data-difficulty="2" class="active">Fácil (2×2)</button>
@@ -230,7 +221,7 @@
     </div>
     
     <audio id="bg-music" loop>
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3" type="audio/mpeg">
     </audio>
     
     <script>
@@ -250,8 +241,8 @@
         // Variables del juego
         let pieces = [];
         let placedPieces = 0;
-        let boardWidth = 500;
-        let boardHeight = 650;
+        let boardWidth = 816; // Tamaño carta en pixels (8.5x11" a 96dpi)
+        let boardHeight = 1056;
         let pieceWidth = 0;
         let pieceHeight = 0;
         let imgObj = null;
@@ -294,15 +285,15 @@
         }
         
         function adjustBoardSize() {
-            if (window.innerWidth <= 500) {
-                boardWidth = 300;
-                boardHeight = 390;
-            } else if (window.innerWidth <= 1100) {
-                boardWidth = 400;
-                boardHeight = 520;
+            if (window.innerWidth <= 700) {
+                boardWidth = 408; // 50% del tamaño carta
+                boardHeight = 528;
+            } else if (window.innerWidth <= 1800) {
+                boardWidth = 612; // 75% del tamaño carta
+                boardHeight = 792;
             } else {
-                boardWidth = 500;
-                boardHeight = 650;
+                boardWidth = 816; // Tamaño carta completo
+                boardHeight = 1056;
             }
         }
         
