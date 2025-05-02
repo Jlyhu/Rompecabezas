@@ -29,12 +29,12 @@
             flex-direction: column;
             align-items: center;
             margin-bottom: 15px;
+            text-align: center;
         }
         
         h1 {
             color: #5D4037;
             margin: 0;
-            text-align: center;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
             font-size: 2rem;
             font-weight: 600;
@@ -68,10 +68,10 @@
         }
         
         #puzzle-container {
-            width: 90vmin;
-            height: 117vmin; /* Relación 3:4 */
-            max-width: 612px;
-            max-height: 792px;
+            width: 117vmin; /* Ancho mayor para horizontal */
+            height: 90vmin; /* Alto menor para horizontal */
+            max-width: 792px; /* 27.94cm en px (27.94/2.54*96) */
+            max-height: 612px; /* 21.59cm en px */
             border: 3px solid #5D4037;
             border-radius: 10px;
             background-color: #D2B48C;
@@ -244,6 +244,11 @@
                 padding: 8px 16px;
                 font-size: 13px;
             }
+            
+            #puzzle-container {
+                width: 95vmin;
+                height: 73vmin; /* Mantener relación 27.94:21.59 ≈ 1.29 */
+            }
         }
         
         @media (max-width: 480px) {
@@ -262,6 +267,11 @@
             #difficulty-selector button {
                 padding: 5px 8px;
                 font-size: 11px;
+            }
+            
+            #puzzle-container {
+                width: 90vmin;
+                height: 70vmin;
             }
         }
     </style>
@@ -362,11 +372,16 @@
         }
         
         function calculateBoardSize() {
+            // Tamaño basado en relación 27.94:21.59 ≈ 1.29 (ancho:alto)
+            const maxWidth = 792; // 27.94cm en px
+            const maxHeight = 612; // 21.59cm en px
+            
+            // Calcular tamaño basado en el ancho de pantalla
             const containerWidth = Math.min(
                 window.innerWidth * 0.9,
-                612 // max-width
+                maxWidth
             );
-            const containerHeight = containerWidth * (4/3); // Relación 3:4
+            const containerHeight = containerWidth / 1.29;
             
             puzzleContainer.style.width = containerWidth + 'px';
             puzzleContainer.style.height = containerHeight + 'px';
@@ -388,7 +403,7 @@
             if (isFirstInteraction) {
                 isFirstInteraction = false;
                 isMusicOn = true;
-                bgMusic.volume = 0.1; // Volumen más bajo para melodía suave
+                bgMusic.volume = 0.1;
                 pieceSound.volume = 0.2;
                 bgMusic.play().catch(e => console.log("Error al reproducir música:", e));
                 musicControl.innerHTML = '<i class="fas fa-volume-up"></i>';
@@ -426,7 +441,7 @@
             };
             
             img.onerror = function() {
-                // Si no hay imagen, creamos un fondo de ejemplo
+                // Si no hay imagen, creamos un fondo de ejemplo horizontal
                 imgObj = createSampleImage();
                 hintImage.src = imgObj.src;
                 createPuzzlePieces(imgObj);
@@ -436,12 +451,12 @@
         
         function createSampleImage() {
             const canvas = document.createElement('canvas');
-            canvas.width = 800;
-            canvas.height = 600;
+            canvas.width = 792; // 27.94cm
+            canvas.height = 612; // 21.59cm
             const ctx = canvas.getContext('2d');
             
-            // Fondo degradado
-            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            // Fondo degradado horizontal
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
             gradient.addColorStop(0, '#FFC107');
             gradient.addColorStop(1, '#FF9800');
             ctx.fillStyle = gradient;
@@ -453,7 +468,7 @@
             ctx.textAlign = 'center';
             ctx.fillText('Rompecabezas Familiar', canvas.width/2, canvas.height/2);
             ctx.font = '20px Poppins';
-            ctx.fillText('Coloca las piezas en su lugar', canvas.width/2, canvas.height/2 + 40);
+            ctx.fillText('Imagen horizontal 27.94cm × 21.59cm', canvas.width/2, canvas.height/2 + 40);
             
             // Convertir canvas a imagen
             const img = new Image();
