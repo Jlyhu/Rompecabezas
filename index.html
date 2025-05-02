@@ -5,12 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ser familia de todas formas</title>
     <style>
-        @font-face {
-            font-family: 'Pixie Ring';
-            src: url('https://fonts.cdnfonts.com/css/pixie-ring') format('woff2');
-            font-weight: normal;
-            font-style: normal;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         
         * {
             box-sizing: border-box;
@@ -19,7 +14,7 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -29,14 +24,25 @@
             overflow-x: hidden;
         }
         
+        .header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
         h1 {
-            font-family: 'Pixie Ring', cursive;
             color: #5D4037;
-            margin: 10px 0;
+            margin: 0;
             text-align: center;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
             font-size: 2rem;
-            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        
+        .nutella-logo {
+            width: 120px;
+            margin-top: 10px;
         }
         
         .game-container {
@@ -74,6 +80,16 @@
             overflow: hidden;
             z-index: 1;
             position: relative;
+        }
+        
+        #puzzle-container .hint-image {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            opacity: 0.3;
+            z-index: 0;
+            display: none;
         }
         
         #pieces-area {
@@ -134,7 +150,8 @@
             font-size: 14px;
             transition: all 0.3s;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            font-weight: 600;
+            font-weight: 500;
+            font-family: 'Poppins', sans-serif;
         }
         
         button:hover {
@@ -205,18 +222,58 @@
             font-size: 18px;
         }
         
+        #hint-toggle {
+            background-color: #5D4037;
+        }
+        
         @keyframes fadeIn {
             from { opacity: 0; transform: translate(-50%, -40%); }
             to { opacity: 1; transform: translate(-50%, -50%); }
         }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.6rem;
+            }
+            
+            .nutella-logo {
+                width: 100px;
+            }
+            
+            button {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.4rem;
+            }
+            
+            .nutella-logo {
+                width: 80px;
+            }
+            
+            #difficulty-selector {
+                gap: 5px;
+            }
+            
+            #difficulty-selector button {
+                padding: 5px 8px;
+                font-size: 11px;
+            }
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.cdnfonts.com/css/pixie-ring" rel="stylesheet">
 </head>
 <body>
-    <div class="game-container">
+    <div class="header">
         <h1>Ser familia de todas formas</h1>
-        
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Nutella_logo.svg/1200px-Nutella_logo.svg.png" alt="Nutella" class="nutella-logo">
+    </div>
+    
+    <div class="game-container">
         <div id="difficulty-selector">
             <button data-difficulty="2" class="active">Fácil (2×2)</button>
             <button data-difficulty="3">Medio (3×3)</button>
@@ -225,12 +282,15 @@
         </div>
         
         <div class="game-area">
-            <div id="puzzle-container"></div>
+            <div id="puzzle-container">
+                <img class="hint-image" id="hint-image" src="" alt="Pista">
+            </div>
             <div id="pieces-area"></div>
         </div>
         
         <div id="controls">
             <button id="start-btn">Nuevo Juego</button>
+            <button id="hint-toggle">Mostrar Pista</button>
         </div>
     </div>
     
@@ -241,7 +301,7 @@
     </div>
     
     <audio id="bg-music" loop>
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" type="audio/mpeg">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
     </audio>
     
     <audio id="piece-sound">
@@ -257,6 +317,8 @@
         const puzzleContainer = document.getElementById('puzzle-container');
         const piecesArea = document.getElementById('pieces-area');
         const startBtn = document.getElementById('start-btn');
+        const hintToggle = document.getElementById('hint-toggle');
+        const hintImage = document.getElementById('hint-image');
         const successMessage = document.getElementById('success-message');
         const difficultyButtons = document.querySelectorAll('#difficulty-selector button');
         const musicControl = document.getElementById('music-control');
@@ -271,6 +333,7 @@
         let imgObj = null;
         let isMusicOn = false;
         let isFirstInteraction = true;
+        let hintVisible = false;
         
         // Inicializar el juego
         function initGame() {
@@ -293,13 +356,12 @@
                 });
             });
             
+            hintToggle.addEventListener('click', toggleHint);
             musicControl.addEventListener('click', toggleMusic);
             document.addEventListener('click', initMusic, { once: true });
         }
         
         function calculateBoardSize() {
-            // El tamaño ya está controlado por CSS con vmin
-            // Solo necesitamos asegurarnos de que las dimensiones sean correctas
             const containerWidth = Math.min(
                 window.innerWidth * 0.9,
                 612 // max-width
@@ -310,12 +372,24 @@
             puzzleContainer.style.height = containerHeight + 'px';
         }
         
+        function toggleHint() {
+            hintVisible = !hintVisible;
+            
+            if (hintVisible) {
+                hintImage.style.display = 'block';
+                hintToggle.textContent = 'Ocultar Pista';
+            } else {
+                hintImage.style.display = 'none';
+                hintToggle.textContent = 'Mostrar Pista';
+            }
+        }
+        
         function initMusic() {
             if (isFirstInteraction) {
                 isFirstInteraction = false;
                 isMusicOn = true;
-                bgMusic.volume = 0.2;
-                pieceSound.volume = 0.3;
+                bgMusic.volume = 0.1; // Volumen más bajo para melodía suave
+                pieceSound.volume = 0.2;
                 bgMusic.play().catch(e => console.log("Error al reproducir música:", e));
                 musicControl.innerHTML = '<i class="fas fa-volume-up"></i>';
             }
@@ -347,12 +421,14 @@
             
             img.onload = function() {
                 imgObj = img;
+                hintImage.src = IMAGE_URL;
                 createPuzzlePieces(img);
             };
             
             img.onerror = function() {
                 // Si no hay imagen, creamos un fondo de ejemplo
                 imgObj = createSampleImage();
+                hintImage.src = imgObj.src;
                 createPuzzlePieces(imgObj);
                 console.log('No se encontró puzzle.jpg, usando imagen de ejemplo');
             };
@@ -373,21 +449,27 @@
             
             // Texto
             ctx.fillStyle = '#5D4037';
-            ctx.font = 'bold 40px Arial';
+            ctx.font = 'bold 40px Poppins';
             ctx.textAlign = 'center';
             ctx.fillText('Rompecabezas Familiar', canvas.width/2, canvas.height/2);
-            ctx.font = '20px Arial';
+            ctx.font = '20px Poppins';
             ctx.fillText('Coloca las piezas en su lugar', canvas.width/2, canvas.height/2 + 40);
             
-            return canvas;
+            // Convertir canvas a imagen
+            const img = new Image();
+            img.src = canvas.toDataURL();
+            return img;
         }
         
         function createPuzzlePieces(img) {
-            puzzleContainer.innerHTML = '';
+            puzzleContainer.innerHTML = '<img class="hint-image" id="hint-image" src="' + (img.src || IMAGE_URL) + '" alt="Pista">';
             piecesArea.innerHTML = '';
             pieces = [];
             placedPieces = 0;
             successMessage.style.display = 'none';
+            hintImage.style.display = 'none';
+            hintVisible = false;
+            hintToggle.textContent = 'Mostrar Pista';
             
             const fullCanvas = document.createElement('canvas');
             fullCanvas.width = puzzleContainer.offsetWidth;
