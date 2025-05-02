@@ -68,10 +68,10 @@
         }
         
         #puzzle-container {
-            width: 117vmin; /* Ancho mayor para horizontal */
-            height: 90vmin; /* Alto menor para horizontal */
-            max-width: 792px; /* 27.94cm en px (27.94/2.54*96) */
-            max-height: 612px; /* 21.59cm en px */
+            width: 117vmin;
+            height: 90vmin;
+            max-width: 792px;
+            max-height: 612px;
             border: 3px solid #5D4037;
             border-radius: 10px;
             background-color: #D2B48C;
@@ -80,16 +80,6 @@
             overflow: hidden;
             z-index: 1;
             position: relative;
-        }
-        
-        #puzzle-container .hint-image {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            opacity: 0.3;
-            z-index: 0;
-            display: none;
         }
         
         #pieces-area {
@@ -201,6 +191,12 @@
             animation: fadeIn 0.5s;
         }
         
+        #download-btn {
+            display: none;
+            margin-top: 10px;
+            background-color: #5D4037;
+        }
+        
         #music-control {
             position: fixed;
             bottom: 15px;
@@ -220,10 +216,6 @@
         #music-control i {
             color: white;
             font-size: 18px;
-        }
-        
-        #hint-toggle {
-            background-color: #5D4037;
         }
         
         @keyframes fadeIn {
@@ -247,7 +239,7 @@
             
             #puzzle-container {
                 width: 95vmin;
-                height: 73vmin; /* Mantener relación 27.94:21.59 ≈ 1.29 */
+                height: 73vmin;
             }
         }
         
@@ -280,7 +272,7 @@
 <body>
     <div class="header">
         <h1>Ser familia de todas formas</h1>
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Nutella_logo.svg/1200px-Nutella_logo.svg.png" alt="Nutella" class="nutella-logo">
+        <img src="nutella.png" alt="Nutella" class="nutella-logo">
     </div>
     
     <div class="game-container">
@@ -292,15 +284,13 @@
         </div>
         
         <div class="game-area">
-            <div id="puzzle-container">
-                <img class="hint-image" id="hint-image" src="" alt="Pista">
-            </div>
+            <div id="puzzle-container"></div>
             <div id="pieces-area"></div>
         </div>
         
         <div id="controls">
             <button id="start-btn">Nuevo Juego</button>
-            <button id="hint-toggle">Mostrar Pista</button>
+            <button id="download-btn" style="display:none;">Descargar Imagen</button>
         </div>
     </div>
     
@@ -314,8 +304,8 @@
         <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
     </audio>
     
-    <audio id="piece-sound">
-        <source src="https://www.soundjay.com/buttons/sounds/button-09.mp3" type="audio/mpeg">
+    <audio id="piece-sound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-wooden-hit-2184.mp3" type="audio/mpeg">
     </audio>
     
     <script>
@@ -327,8 +317,7 @@
         const puzzleContainer = document.getElementById('puzzle-container');
         const piecesArea = document.getElementById('pieces-area');
         const startBtn = document.getElementById('start-btn');
-        const hintToggle = document.getElementById('hint-toggle');
-        const hintImage = document.getElementById('hint-image');
+        const downloadBtn = document.getElementById('download-btn');
         const successMessage = document.getElementById('success-message');
         const difficultyButtons = document.querySelectorAll('#difficulty-selector button');
         const musicControl = document.getElementById('music-control');
@@ -343,7 +332,7 @@
         let imgObj = null;
         let isMusicOn = false;
         let isFirstInteraction = true;
-        let hintVisible = false;
+        let completedPuzzleCanvas = null;
         
         // Inicializar el juego
         function initGame() {
@@ -356,6 +345,7 @@
             
             // Configurar eventos
             startBtn.addEventListener('click', initGame);
+            downloadBtn.addEventListener('click', downloadImage);
             
             difficultyButtons.forEach(button => {
                 button.addEventListener('click', function() {
@@ -366,17 +356,16 @@
                 });
             });
             
-            hintToggle.addEventListener('click', toggleHint);
             musicControl.addEventListener('click', toggleMusic);
             document.addEventListener('click', initMusic, { once: true });
+            
+            downloadBtn.style.display = 'none';
         }
         
         function calculateBoardSize() {
-            // Tamaño basado en relación 27.94:21.59 ≈ 1.29 (ancho:alto)
             const maxWidth = 792; // 27.94cm en px
             const maxHeight = 612; // 21.59cm en px
             
-            // Calcular tamaño basado en el ancho de pantalla
             const containerWidth = Math.min(
                 window.innerWidth * 0.9,
                 maxWidth
@@ -387,24 +376,12 @@
             puzzleContainer.style.height = containerHeight + 'px';
         }
         
-        function toggleHint() {
-            hintVisible = !hintVisible;
-            
-            if (hintVisible) {
-                hintImage.style.display = 'block';
-                hintToggle.textContent = 'Ocultar Pista';
-            } else {
-                hintImage.style.display = 'none';
-                hintToggle.textContent = 'Mostrar Pista';
-            }
-        }
-        
         function initMusic() {
             if (isFirstInteraction) {
                 isFirstInteraction = false;
                 isMusicOn = true;
                 bgMusic.volume = 0.1;
-                pieceSound.volume = 0.2;
+                pieceSound.volume = 0.5;
                 bgMusic.play().catch(e => console.log("Error al reproducir música:", e));
                 musicControl.innerHTML = '<i class="fas fa-volume-up"></i>';
             }
@@ -436,14 +413,11 @@
             
             img.onload = function() {
                 imgObj = img;
-                hintImage.src = IMAGE_URL;
                 createPuzzlePieces(img);
             };
             
             img.onerror = function() {
-                // Si no hay imagen, creamos un fondo de ejemplo horizontal
                 imgObj = createSampleImage();
-                hintImage.src = imgObj.src;
                 createPuzzlePieces(imgObj);
                 console.log('No se encontró puzzle.jpg, usando imagen de ejemplo');
             };
@@ -451,18 +425,16 @@
         
         function createSampleImage() {
             const canvas = document.createElement('canvas');
-            canvas.width = 792; // 27.94cm
-            canvas.height = 612; // 21.59cm
+            canvas.width = 792;
+            canvas.height = 612;
             const ctx = canvas.getContext('2d');
             
-            // Fondo degradado horizontal
             const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
             gradient.addColorStop(0, '#FFC107');
             gradient.addColorStop(1, '#FF9800');
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Texto
             ctx.fillStyle = '#5D4037';
             ctx.font = 'bold 40px Poppins';
             ctx.textAlign = 'center';
@@ -470,44 +442,37 @@
             ctx.font = '20px Poppins';
             ctx.fillText('Imagen horizontal 27.94cm × 21.59cm', canvas.width/2, canvas.height/2 + 40);
             
-            // Convertir canvas a imagen
             const img = new Image();
             img.src = canvas.toDataURL();
             return img;
         }
         
         function createPuzzlePieces(img) {
-            puzzleContainer.innerHTML = '<img class="hint-image" id="hint-image" src="' + (img.src || IMAGE_URL) + '" alt="Pista">';
+            puzzleContainer.innerHTML = '';
             piecesArea.innerHTML = '';
             pieces = [];
             placedPieces = 0;
             successMessage.style.display = 'none';
-            hintImage.style.display = 'none';
-            hintVisible = false;
-            hintToggle.textContent = 'Mostrar Pista';
+            downloadBtn.style.display = 'none';
             
             const fullCanvas = document.createElement('canvas');
             fullCanvas.width = puzzleContainer.offsetWidth;
             fullCanvas.height = puzzleContainer.offsetHeight;
             const fullCtx = fullCanvas.getContext('2d');
             
-            // Dibujar fondo de madera
             fullCtx.fillStyle = '#D2B48C';
             fullCtx.fillRect(0, 0, fullCanvas.width, fullCanvas.height);
             
-            // Calcular dimensiones para que la imagen se ajuste manteniendo relación de aspecto
             const imgRatio = img.width / img.height;
             const containerRatio = fullCanvas.width / fullCanvas.height;
             
             let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
             
             if (imgRatio > containerRatio) {
-                // La imagen es más ancha que el contenedor
                 drawHeight = fullCanvas.height;
                 drawWidth = drawHeight * imgRatio;
                 offsetX = (fullCanvas.width - drawWidth) / 2;
             } else {
-                // La imagen es más alta que el contenedor
                 drawWidth = fullCanvas.width;
                 drawHeight = drawWidth / imgRatio;
                 offsetY = (fullCanvas.height - drawHeight) / 2;
@@ -515,15 +480,14 @@
             
             fullCtx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
             
-            // Crear piezas y distribuirlas alrededor del puzzle
+            // Guardar el canvas completo para descargar luego
+            completedPuzzleCanvas = fullCanvas;
+            
             for (let row = 0; row < GRID_SIZE; row++) {
                 for (let col = 0; col < GRID_SIZE; col++) {
                     const piece = createPiece(fullCanvas, row, col);
                     piecesArea.appendChild(piece);
-                    
-                    // Posicionar aleatoriamente alrededor del puzzle
                     positionPieceAround(piece);
-                    
                     pieces.push(piece);
                 }
             }
@@ -542,13 +506,11 @@
                 bottom: areaRect.bottom
             };
             
-            // Convertir coordenadas globales a relativas
             const puzzleLeft = puzzleRect.left - safeArea.left;
             const puzzleTop = puzzleRect.top - safeArea.top;
             const puzzleRight = puzzleLeft + puzzleRect.width;
             const puzzleBottom = puzzleTop + puzzleRect.height;
             
-            // Áreas donde pueden aparecer las piezas
             const areas = [
                 { // Arriba
                     x: [margin, areaRect.width - piece.offsetWidth - margin],
@@ -568,7 +530,6 @@
                 }
             ];
             
-            // Filtrar áreas válidas (donde el espacio es suficiente)
             const validAreas = areas.filter(area => {
                 const widthAvailable = area.x[1] - area.x[0] > 0;
                 const heightAvailable = area.y[1] - area.y[0] > 0;
@@ -576,15 +537,12 @@
             });
             
             if (validAreas.length === 0) {
-                // Si no hay espacio suficiente, colocar en cualquier lugar
                 piece.style.left = Math.random() * (areaRect.width - piece.offsetWidth - margin * 2) + margin + 'px';
                 piece.style.top = Math.random() * (areaRect.height - piece.offsetHeight - margin * 2) + margin + 'px';
                 return;
             }
             
-            // Seleccionar un área aleatoria válida
             const area = validAreas[Math.floor(Math.random() * validAreas.length)];
-            
             const posX = Math.random() * (area.x[1] - area.x[0]) + area.x[0];
             const posY = Math.random() * (area.y[1] - area.y[0]) + area.y[0];
             
@@ -644,7 +602,6 @@
                     e.preventDefault();
                 }
                 
-                // Guardar posición inicial para posible cancelación
                 startX = parseFloat(piece.style.left) || 0;
                 startY = parseFloat(piece.style.top) || 0;
                 
@@ -704,8 +661,6 @@
                         
                         placePiece(piece, targetRow, targetCol);
                     } else {
-                        // Si no es la posición correcta pero está dentro del contenedor,
-                        // dejarla donde el usuario la soltó
                         const gameArea = document.querySelector('.game-area');
                         const areaRect = gameArea.getBoundingClientRect();
                         
@@ -717,7 +672,6 @@
                         piece.style.zIndex = '10';
                     }
                 } else {
-                    // Si está fuera del contenedor, dejarla donde el usuario la soltó
                     const gameArea = document.querySelector('.game-area');
                     const areaRect = gameArea.getBoundingClientRect();
                     
@@ -744,7 +698,7 @@
                 piece.style.cursor = 'default';
                 piece.style.zIndex = '1';
                 
-                // Reproducir sonido al colocar pieza
+                // Reproducir sonido de madera al colocar pieza
                 if (!isFirstInteraction) {
                     pieceSound.currentTime = 0;
                     pieceSound.play().catch(e => console.log("Error al reproducir sonido:", e));
@@ -767,10 +721,20 @@
         function showSuccess() {
             successMessage.style.display = 'block';
             successMessage.textContent = '¡Rompecabezas Completo!';
+            downloadBtn.style.display = 'block';
             
             setTimeout(() => {
                 successMessage.style.display = 'none';
             }, 2000);
+        }
+        
+        function downloadImage() {
+            if (!completedPuzzleCanvas) return;
+            
+            const link = document.createElement('a');
+            link.download = 'rompecabezas-completo.jpg';
+            link.href = completedPuzzleCanvas.toDataURL('image/jpeg', 0.9);
+            link.click();
         }
         
         window.addEventListener('load', initGame);
