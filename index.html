@@ -37,8 +37,8 @@
         }
         
         #puzzle-container {
-            width: 400px;
-            height: 400px;
+            width: 500px;
+            height: 650px; /* Proporción carta (8.5x11 pulgadas) */
             border: 3px solid #2c3e50;
             border-radius: 10px;
             background-color: #ecf0f1;
@@ -47,7 +47,7 @@
         }
         
         #pieces-container {
-            width: 400px;
+            width: 500px;
             min-height: 400px;
             display: flex;
             flex-wrap: wrap;
@@ -60,9 +60,7 @@
         }
         
         .puzzle-piece {
-            width: calc(400px / var(--grid-size) - 10px);
-            height: calc(400px / var(--grid-size) - 10px);
-            background-size: 400px 400px;
+            background-size: cover;
             position: relative;
             cursor: grab;
             transition: transform 0.1s;
@@ -109,6 +107,21 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 8px rgba(0,0,0,0.15);
         }
+
+        #difficulty-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        #difficulty-selector button {
+            padding: 8px 15px;
+            background-color: #95a5a6;
+        }
+        
+        #difficulty-selector button.active {
+            background-color: #27ae60;
+        }
         
         #success-message {
             display: none;
@@ -138,21 +151,26 @@
                 align-items: center;
             }
             
-            #puzzle-container, #pieces-container {
+            #puzzle-container {
                 width: 300px;
-                height: 300px;
+                height: 390px; /* Mantiene proporción carta */
             }
             
-            .puzzle-piece {
-                width: calc(300px / var(--grid-size) - 10px);
-                height: calc(300px / var(--grid-size) - 10px);
-                background-size: 300px 300px;
+            #pieces-container {
+                width: 300px;
             }
         }
     </style>
 </head>
 <body>
     <h1>Rompecabezas Arrastrable</h1>
+    
+    <div id="difficulty-selector">
+        <button data-difficulty="2" class="active">Fácil (2×2)</button>
+        <button data-difficulty="3">Medio (3×3)</button>
+        <button data-difficulty="4">Difícil (4×4)</button>
+        <button data-difficulty="6">Experto (6×6)</button>
+    </div>
     
     <div class="game-area">
         <div id="puzzle-container"></div>
@@ -167,7 +185,7 @@
     
     <script>
         // Configuración del juego
-        const GRID_SIZE = 4; // 4x4 piezas
+        let GRID_SIZE = 2; // Valor inicial: Fácil
         const IMAGE_URL = 'puzzle.jpg'; // Nombre de tu imagen
         
         // Elementos del DOM
@@ -175,39 +193,70 @@
         const piecesContainer = document.getElementById('pieces-container');
         const startBtn = document.getElementById('start-btn');
         const successMessage = document.getElementById('success-message');
+        const difficultyButtons = document.querySelectorAll('#difficulty-selector button');
         
         // Variables del juego
         let pieces = [];
         let placedPieces = 0;
-        let boardSize = 400;
-        let pieceSize = 0;
+        let boardWidth = 500;
+        let boardHeight = 650;
+        let pieceWidth = 0;
+        let pieceHeight = 0;
+        let imgObj = null; // Para almacenar la imagen cargada
         
         // Inicializar el juego
         function initGame() {
             // Ajustar tamaño para móviles
             if (window.innerWidth <= 900) {
-                boardSize = 300;
+                boardWidth = 300;
+                boardHeight = 390;
+            } else {
+                boardWidth = 500;
+                boardHeight = 650;
             }
             
-            puzzleContainer.style.width = boardSize + 'px';
-            puzzleContainer.style.height = boardSize + 'px';
-            piecesContainer.style.width = boardSize + 'px';
+            puzzleContainer.style.width = boardWidth + 'px';
+            puzzleContainer.style.height = boardHeight + 'px';
+            piecesContainer.style.width = boardWidth + 'px';
             
-            pieceSize = boardSize / GRID_SIZE;
+            pieceWidth = boardWidth / GRID_SIZE;
+            pieceHeight = boardHeight / GRID_SIZE;
             
             // Cargar la imagen
             loadImage();
             
             // Event listeners
             startBtn.addEventListener('click', initGame);
+            
+            // Configurar botones de dificultad
+            difficultyButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Actualizar botón activo
+                    difficultyButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Establecer dificultad
+                    GRID_SIZE = parseInt(this.dataset.difficulty);
+                    
+                    // Reiniciar juego
+                    initGame();
+                });
+            });
         }
         
         function loadImage() {
+            if (imgObj) {
+                // Si ya tenemos la imagen cargada, usarla directamente
+                createPuzzlePieces(imgObj);
+                return;
+            }
+            
             const img = new Image();
             img.crossOrigin = "Anonymous";
             img.src = IMAGE_URL;
             
             img.onload = function() {
+                imgObj = img; // Guardar la imagen
                 createPuzzlePieces(img);
             };
             
@@ -224,58 +273,69 @@
             placedPieces = 0;
             successMessage.style.display = 'none';
             
-            // Crear canvas temporal
-            const canvas = document.createElement('canvas');
-            canvas.width = boardSize;
-            canvas.height = boardSize;
-            const ctx = canvas.getContext('2d');
+            // Crear canvas temporal para la imagen completa
+            const fullCanvas = document.createElement('canvas');
+            fullCanvas.width = boardWidth;
+            fullCanvas.height = boardHeight;
+            const fullCtx = fullCanvas.getContext('2d');
             
-            // Dibujar imagen ajustada
+            // Dibujar imagen preservando la proporción
             const imgRatio = img.width / img.height;
-            const containerRatio = boardSize / boardSize;
+            const containerRatio = boardWidth / boardHeight;
             
             let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
             
             if (imgRatio > containerRatio) {
-                drawHeight = boardSize;
-                drawWidth = img.width * (boardSize / img.height);
-                offsetX = (boardSize - drawWidth) / 2;
+                // Imagen más ancha que el contenedor
+                drawWidth = boardWidth;
+                drawHeight = boardWidth / imgRatio;
+                offsetY = (boardHeight - drawHeight) / 2;
             } else {
-                drawWidth = boardSize;
-                drawHeight = img.height * (boardSize / img.width);
-                offsetY = (boardSize - drawHeight) / 2;
+                // Imagen más alta que el contenedor
+                drawHeight = boardHeight;
+                drawWidth = boardHeight * imgRatio;
+                offsetX = (boardWidth - drawWidth) / 2;
             }
             
-            ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+            // Dibujar con suavizado para mejor calidad
+            fullCtx.imageSmoothingEnabled = true;
+            fullCtx.imageSmoothingQuality = 'high';
+            fullCtx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
             
-            // Crear piezas
+            // Crear piezas individuales
             for (let row = 0; row < GRID_SIZE; row++) {
                 for (let col = 0; col < GRID_SIZE; col++) {
+                    // Crear pieza
                     const piece = document.createElement('div');
                     piece.className = 'puzzle-piece';
-                    piece.style.setProperty('--grid-size', GRID_SIZE);
+                    
+                    // Tamaño de la pieza
+                    piece.style.width = pieceWidth + 'px';
+                    piece.style.height = pieceHeight + 'px';
                     
                     // Posición original
                     piece.dataset.row = row;
                     piece.dataset.col = col;
                     
-                    // Coordenadas del background
-                    const bgX = -col * pieceSize;
-                    const bgY = -row * pieceSize;
-                    
-                    // Crear canvas para la pieza
+                    // Crear canvas para la pieza individual
                     const pieceCanvas = document.createElement('canvas');
-                    pieceCanvas.width = pieceSize;
-                    pieceCanvas.height = pieceSize;
+                    pieceCanvas.width = pieceWidth;
+                    pieceCanvas.height = pieceHeight;
                     const pieceCtx = pieceCanvas.getContext('2d');
+                    
+                    // Activar suavizado para mejor calidad
+                    pieceCtx.imageSmoothingEnabled = true;
+                    pieceCtx.imageSmoothingQuality = 'high';
+                    
+                    // Extraer fragmento de la imagen
                     pieceCtx.drawImage(
-                        canvas,
-                        col * pieceSize, row * pieceSize, pieceSize, pieceSize,
-                        0, 0, pieceSize, pieceSize
+                        fullCanvas,
+                        col * pieceWidth, row * pieceHeight, pieceWidth, pieceHeight,
+                        0, 0, pieceWidth, pieceHeight
                     );
                     
-                    piece.style.backgroundImage = `url(${pieceCanvas.toDataURL()})`;
-                    piece.style.backgroundPosition = `${bgX}px ${bgY}px`;
+                    // Aplicar la imagen como fondo
+                    piece.style.backgroundImage = `url(${pieceCanvas.toDataURL('image/jpeg', 1.0)})`;
                     
                     // Hacer arrastrable
                     makeDraggable(piece);
@@ -351,17 +411,20 @@
                     pieceCenterY > puzzleRect.top && pieceCenterY < puzzleRect.bottom) {
                     
                     // Calcular posición correcta
-                    const targetCol = Math.floor((pieceCenterX - puzzleRect.left) / pieceSize);
-                    const targetRow = Math.floor((pieceCenterY - puzzleRect.top) / pieceSize);
+                    const targetCol = Math.floor((pieceCenterX - puzzleRect.left) / pieceWidth);
+                    const targetRow = Math.floor((pieceCenterY - puzzleRect.top) / pieceHeight);
                     
-                    // Verificar si es la posición correcta
+                    // Verificar si es la posición correcta y está dentro de los límites
                     if (parseInt(piece.dataset.row) === targetRow && 
-                        parseInt(piece.dataset.col) === targetCol) {
+                        parseInt(piece.dataset.col) === targetCol &&
+                        targetRow >= 0 && targetRow < GRID_SIZE &&
+                        targetCol >= 0 && targetCol < GRID_SIZE) {
                         
                         // Colocar en la posición correcta
+                        puzzleContainer.appendChild(piece);
                         piece.classList.add('placed');
-                        piece.style.left = (targetCol * pieceSize) + 'px';
-                        piece.style.top = (targetRow * pieceSize) + 'px';
+                        piece.style.left = (targetCol * pieceWidth) + 'px';
+                        piece.style.top = (targetRow * pieceHeight) + 'px';
                         piece.style.cursor = 'default';
                         
                         // Verificar si el puzzle está completo
@@ -410,9 +473,8 @@
         // Iniciar el juego
         window.addEventListener('load', initGame);
         window.addEventListener('resize', function() {
-            if (window.innerWidth <= 900 && boardSize !== 300) {
-                initGame();
-            } else if (window.innerWidth > 900 && boardSize !== 400) {
+            if ((window.innerWidth <= 900 && boardWidth !== 300) || 
+                (window.innerWidth > 900 && boardWidth !== 500)) {
                 initGame();
             }
         });
