@@ -3,8 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rompecabezas Familiar</title>
+    <title>Ser familia de todas formas</title>
     <style>
+        @font-face {
+            font-family: 'Pixie Ring';
+            src: url('https://fonts.cdnfonts.com/css/pixie-ring') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
         * {
             box-sizing: border-box;
             margin: 0;
@@ -22,10 +29,13 @@
         }
         
         h1 {
+            font-family: 'Pixie Ring', cursive;
             color: #5D4037;
             margin: 20px 0;
             text-align: center;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            font-size: 2.5rem;
+            letter-spacing: 1px;
         }
         
         .game-container {
@@ -50,8 +60,8 @@
             height: 792px;
             border: 3px solid #5D4037;
             border-radius: 10px;
-            background-color: #f5e9dc; /* Cambiado a un tono más claro */
-            background-image: url('https://www.transparenttextures.com/patterns/cardboard.png'); /* Textura de cartón */
+            background-color: #D2B48C; /* Color café claro */
+            background-image: url('https://www.transparenttextures.com/patterns/wood-pattern.png');
             position: absolute;
             top: 0;
             left: 50%;
@@ -67,7 +77,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 0;
+            z-index: 2; /* Aseguramos que las piezas estén sobre el contenedor */
         }
         
         .puzzle-piece {
@@ -78,13 +88,13 @@
             border: 2px solid #FFF3E0;
             box-shadow: 0 3px 5px rgba(0,0,0,0.2);
             background-color: #FFF3E0;
-            z-index: 2;
+            z-index: 10; /* Z-index alto para que siempre estén encima */
         }
         
         .puzzle-piece:active {
             cursor: grabbing;
             transform: scale(1.03);
-            z-index: 10;
+            z-index: 100;
             box-shadow: 0 5px 10px rgba(0,0,0,0.3);
         }
         
@@ -93,7 +103,7 @@
             cursor: default;
             box-shadow: none;
             border: 1px solid rgba(93, 64, 55, 0.3);
-            z-index: 1;
+            z-index: 1; /* Piezas colocadas detrás de las que se arrastran */
         }
         
         #controls {
@@ -158,7 +168,7 @@
             border-radius: 10px;
             font-size: 24px;
             font-weight: bold;
-            z-index: 100;
+            z-index: 1000; /* Encima de todo */
             box-shadow: 0 10px 25px rgba(0,0,0,0.15);
             animation: fadeIn 0.5s;
         }
@@ -175,7 +185,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            z-index: 10;
+            z-index: 1000;
             box-shadow: 0 3px 10px rgba(0,0,0,0.15);
         }
         
@@ -183,33 +193,6 @@
             color: white;
             font-size: 24px;
         }
-
-        #background-selector {
-            margin-top: 10px;
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .bg-option {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 2px solid #FFF;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: all 0.2s ease;
-        }
-
-        .bg-option:hover, .bg-option.active {
-            transform: scale(1.2);
-            border-color: #5D4037;
-        }
-
-        .bg-wood { background-color: #8D6E63; }
-        .bg-cork { background-color: #D7CCC8; }
-        .bg-felt { background-color: #81C784; }
-        .bg-denim { background-color: #5C6BC0; }
         
         @keyframes fadeIn {
             from { opacity: 0; transform: translate(-50%, -40%); }
@@ -223,6 +206,9 @@
             #puzzle-container {
                 width: 500px;
                 height: 650px;
+            }
+            h1 {
+                font-size: 2rem;
             }
         }
         
@@ -238,6 +224,9 @@
                 flex-wrap: wrap;
                 justify-content: center;
             }
+            h1 {
+                font-size: 1.8rem;
+            }
         }
         
         @media (max-width: 500px) {
@@ -249,28 +238,22 @@
                 height: 390px;
             }
             h1 {
-                font-size: 24px;
+                font-size: 1.5rem;
             }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.cdnfonts.com/css/pixie-ring" rel="stylesheet">
 </head>
 <body>
     <div class="game-container">
-        <h1>Rompecabezas Familiar</h1>
+        <h1>Ser familia de todas formas</h1>
         
         <div id="difficulty-selector">
             <button data-difficulty="2" class="active">Fácil (2×2)</button>
             <button data-difficulty="3">Medio (3×3)</button>
             <button data-difficulty="4">Difícil (4×4)</button>
             <button data-difficulty="5">Experto (5×5)</button>
-        </div>
-        
-        <div id="background-selector">
-            <div class="bg-option bg-wood active" data-bg="wood" title="Madera"></div>
-            <div class="bg-option bg-cork" data-bg="cork" title="Corcho"></div>
-            <div class="bg-option bg-felt" data-bg="felt" title="Fieltro"></div>
-            <div class="bg-option bg-denim" data-bg="denim" title="Mezclilla"></div>
         </div>
         
         <div class="game-area">
@@ -304,7 +287,6 @@
         const startBtn = document.getElementById('start-btn');
         const successMessage = document.getElementById('success-message');
         const difficultyButtons = document.querySelectorAll('#difficulty-selector button');
-        const bgOptions = document.querySelectorAll('.bg-option');
         const musicControl = document.getElementById('music-control');
         const bgMusic = document.getElementById('bg-music');
         
@@ -317,27 +299,6 @@
         let pieceHeight = 0;
         let imgObj = null;
         let isMusicOn = false;
-        let currentBackground = 'wood';
-        
-        // Mapeo de fondos
-        const backgrounds = {
-            wood: {
-                color: '#f5e9dc',
-                texture: 'url("https://www.transparenttextures.com/patterns/wood-pattern.png")'
-            },
-            cork: {
-                color: '#e8e0d5',
-                texture: 'url("https://www.transparenttextures.com/patterns/cardboard.png")'
-            },
-            felt: {
-                color: '#dcedc8',
-                texture: 'url("https://www.transparenttextures.com/patterns/felt.png")'
-            },
-            denim: {
-                color: '#d0d9ff',
-                texture: 'url("https://www.transparenttextures.com/patterns/denim.png")'
-            }
-        };
         
         // Inicializar el juego
         function initGame() {
@@ -363,26 +324,8 @@
                 });
             });
             
-            bgOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    bgOptions.forEach(opt => opt.classList.remove('active'));
-                    this.classList.add('active');
-                    currentBackground = this.dataset.bg;
-                    applyBackground();
-                });
-            });
-            
             musicControl.addEventListener('click', toggleMusic);
             document.addEventListener('click', initMusic, { once: true });
-            
-            // Aplicar fondo inicial
-            applyBackground();
-        }
-        
-        function applyBackground() {
-            const bg = backgrounds[currentBackground];
-            puzzleContainer.style.backgroundColor = bg.color;
-            puzzleContainer.style.backgroundImage = bg.texture;
         }
         
         function adjustBoardSize() {
@@ -449,14 +392,12 @@
             placedPieces = 0;
             successMessage.style.display = 'none';
             
-            // Cálculo mejorado para llenar completamente el contenedor
             const fullCanvas = document.createElement('canvas');
             fullCanvas.width = boardWidth;
             fullCanvas.height = boardHeight;
             const fullCtx = fullCanvas.getContext('2d');
             
-            // Primero pintamos el fondo para áreas transparentes
-            fullCtx.fillStyle = backgrounds[currentBackground].color;
+            fullCtx.fillStyle = '#D2B48C';
             fullCtx.fillRect(0, 0, boardWidth, boardHeight);
             
             // Dimensiones para ajustar la imagen
@@ -466,13 +407,11 @@
             
             // Fill mode - la imagen siempre llenará el contenedor completamente
             if (imgRatio > containerRatio) {
-                // Imagen más ancha que el contenedor - ajustar por altura
                 drawHeight = boardHeight;
                 drawWidth = drawHeight * imgRatio;
                 const offsetX = (boardWidth - drawWidth) / 2;
                 fullCtx.drawImage(img, offsetX, 0, drawWidth, drawHeight);
             } else {
-                // Imagen más alta que el contenedor - ajustar por ancho
                 drawWidth = boardWidth;
                 drawHeight = drawWidth / imgRatio; 
                 const offsetY = (boardHeight - drawHeight) / 2;
@@ -498,11 +437,10 @@
             const areaRect = gameArea.getBoundingClientRect();
             const puzzleRect = puzzleContainer.getBoundingClientRect();
             
-            // Calcular área disponible alrededor del puzzle
-            const margin = 20; // Margen del borde
+            const margin = 20;
             
             let posX, posY;
-            const side = Math.floor(Math.random() * 4); // 0: arriba, 1: derecha, 2: abajo, 3: izquierda
+            const side = Math.floor(Math.random() * 4);
             
             // Convertir coordenadas globales a relativas
             const puzzleLeft = puzzleRect.left - areaRect.left;
@@ -529,7 +467,6 @@
                     break;
             }
             
-            // Asegurarse de que la pieza está completamente dentro del área
             posX = Math.max(margin, Math.min(areaRect.width - pieceWidth - margin, posX));
             posY = Math.max(margin, Math.min(areaRect.height - pieceHeight - margin, posY));
             
@@ -569,7 +506,6 @@
         function makeDraggable(piece) {
             let offsetX, offsetY;
             let isDragging = false;
-            let startX, startY;
             
             piece.addEventListener('mousedown', startDrag);
             piece.addEventListener('touchstart', startDrag, { passive: false });
@@ -583,17 +519,12 @@
                 if (e.type === 'mousedown') {
                     offsetX = e.clientX - rect.left;
                     offsetY = e.clientY - rect.top;
-                    startX = rect.left;
-                    startY = rect.top;
                 } else {
                     offsetX = e.touches[0].clientX - rect.left;
                     offsetY = e.touches[0].clientY - rect.top;
-                    startX = rect.left;
-                    startY = rect.top;
                     e.preventDefault();
                 }
                 
-                // Traer al frente
                 piece.style.zIndex = '100';
                 piece.style.transform = 'scale(1.03)';
                 
@@ -612,7 +543,6 @@
                 const gameArea = document.querySelector('.game-area');
                 const areaRect = gameArea.getBoundingClientRect();
                 
-                // Posición relativa al área de juego
                 const leftPos = clientX - offsetX - areaRect.left;
                 const topPos = clientY - offsetY - areaRect.top;
                 
@@ -638,7 +568,6 @@
                 if (pieceCenterX > puzzleRect.left && pieceCenterX < puzzleRect.right &&
                     pieceCenterY > puzzleRect.top && pieceCenterY < puzzleRect.bottom) {
                     
-                    // Calcular la posición relativa dentro del puzzle
                     const relativeX = pieceCenterX - puzzleRect.left;
                     const relativeY = pieceCenterY - puzzleRect.top;
                     
@@ -650,15 +579,12 @@
                         targetRow >= 0 && targetRow < GRID_SIZE && 
                         targetCol >= 0 && targetCol < GRID_SIZE) {
                         
-                        // Colocar la pieza en su posición correcta
                         placePiece(piece, targetRow, targetCol);
                     } else {
-                        // Volver a la posición inicial
                         resetPiecePosition(piece);
                     }
                 } else {
-                    // La pieza queda donde fue soltada
-                    piece.style.zIndex = '2';
+                    piece.style.zIndex = '10';
                 }
                 
                 removeDragListeners();
@@ -668,7 +594,6 @@
                 puzzleContainer.appendChild(piece);
                 piece.classList.add('placed');
                 
-                // Calcular posición absoluta dentro del puzzle
                 const left = col * pieceWidth;
                 const top = row * pieceHeight;
                 
@@ -684,10 +609,8 @@
             }
             
             function resetPiecePosition(piece) {
-                // Mantener la pieza en el área de juego pero no en su posición original
-                const gameArea = document.querySelector('.game-area');
                 positionPieceAround(piece);
-                piece.style.zIndex = '2';
+                piece.style.zIndex = '10';
             }
             
             function removeDragListeners() {
